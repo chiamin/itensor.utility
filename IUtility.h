@@ -45,7 +45,7 @@ ITensor parity_sign_tensor (const Index& ii)
 
 // ==========
 // Contract the transfer matrix
-/*
+
 inline void contract_transfer (ITensor& E, const ITensor& A)
 {
     E *= A;
@@ -75,7 +75,7 @@ inline void contract_transfer (ITensor& E, const MPS& mps, int i, const SitesT& 
     E.noPrime ("Site");
     E *= dag(prime(mps(i),"Link"));
 }
-*/
+
 
 void contract_transfer_matrix (ITensor& re, const SiteSet& sites, const MPS& mps, int i, const vector<string>& ops, Direction close, bool fermionic)
 // The operators are applied in the reversed order in <ops>
