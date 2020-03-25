@@ -45,6 +45,13 @@ vector<T> read_vector (ifstream& ifs, const string& key, int skip=2)
     return re;
 }
 
+template <typename T>
+vector<T> read_vector (const string& fname, const string& key, int skip=2)
+{
+    ifstream ifs (fname);
+    return read_vector<T> (ifs, key, skip);
+}
+
 bool fstream_goto (ifstream& ifs, const string& key, int skipline=0, string end="")
 {
     // Go to the key-word line
