@@ -19,6 +19,18 @@ vector<ITensor> get_REs (const MPS& mps)
     return Rs;
 }
 
+vector<ITensor> get_LEs (const MPS& mps)
+{
+    int N = length (mps);
+    vector<ITensor> Ls (N+1);
+    Ls.at(1) = ITensor(1);
+    for(int i = 2; i <= N; i++)
+    {
+        Ls.at(i) = Ls.at(i-1) * mps(i-1) * dag(prime(mps(i-1), "Link"));
+    }
+    return Ls;
+}
+
 // For fermionic tensors
 ITensor parity_sign_tensor (const Index& ii)
 {
@@ -76,7 +88,6 @@ inline void contract_transfer (ITensor& E, const MPS& mps, int i, const SitesT& 
     E *= dag(prime(mps(i),"Link"));
 }
 
-
 void contract_transfer_matrix (ITensor& re, const SiteSet& sites, const MPS& mps, int i, const vector<string>& ops, Direction close, bool fermionic)
 // The operators are applied in the reversed order in <ops>
 {
@@ -86,6 +97,7 @@ void contract_transfer_matrix (ITensor& re, const SiteSet& sites, const MPS& mps
     for(int j = ops.size()-1; j >= 0; j--)
     {
         const auto& op = ops.at(j);
+        if (op == "") continue;
         A *= sites.op(op,i);
         A.noPrime();
     }
@@ -108,6 +120,7 @@ void contract_transfer_matrix (ITensor& re, const SiteSet& sites, const MPS& mps
         Ap.prime (rightLinkIndex (mps, i));
     else if (close == Fromright)
         Ap.prime (leftLinkIndex (mps, i));
+
     re *= A;
     re *= Ap;
 }

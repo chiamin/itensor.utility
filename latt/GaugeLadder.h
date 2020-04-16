@@ -53,11 +53,13 @@ class NeighborData
 class GaugeLadder
 {
     public:
-        GaugeLadder (int L, bool lrough, bool rrough);
+        GaugeLadder (int L, bool lrough_, bool rrough_);
 
-        int L  () const { return _L; }
-        int Nf () const { return _N_flux; }
-        int Nc () const { return _N_charge; }
+        int  L      () const { return _L; }
+        int  Nf     () const { return _N_flux; }
+        int  Nc     () const { return _N_charge; }
+        bool lrough () const { return _lrough; }
+        bool rrough () const { return _rrough; }
 
         const vector<ChargeSite>&  charges   () const { return _charges; }
               vector<NeighborData> plaques   () const;
@@ -70,13 +72,16 @@ class GaugeLadder
         int _L, _N_flux, _N_charge;
         vector<ChargeSite>  _charges;
         vector<vector<int>> _plaques;
+        bool _lrough, _rrough;
 
         using SL = SquareLattice;
 };
 
-GaugeLadder :: GaugeLadder (int L, bool lrough, bool rrough)
+GaugeLadder :: GaugeLadder (int L, bool lrough_, bool rrough_)
 : _L (L)
 , _N_charge (L*2)
+, _lrough (lrough_)
+, _rrough (rrough_)
 {
     bool xpbc = false, ypbc = false;
     _charges.resize (_N_charge+1);
@@ -127,8 +132,8 @@ GaugeLadder :: GaugeLadder (int L, bool lrough, bool rrough)
                 if (!nb_in_latt)
                 {
                     nb_i_charge = -1;
-                    if ((x == 1 && lrough && dir == "l")
-                    ||  (x == L && rrough && dir == "r"))
+                    if ((x == 1 && _lrough && dir == "l")
+                    ||  (x == L && _rrough && dir == "r"))
                     {
                         nb_flux = i_flux++;
                     }

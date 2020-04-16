@@ -118,6 +118,17 @@ class Z4Site
             Op.set(Thr,ThrP,cos(6.*Pi/4.)+sin(6.*Pi/4.)*1_i);
             }
         else
+        if(opname == "TauSqr")
+            {
+            Op.set(Zer,ZerP,1);
+            Cplx c = cos(2.*Pi/4.)+sin(2.*Pi/4.)*1_i;
+            Op.set(One,OneP,c*c);
+            Cplx c2 = cos(4.*Pi/4.)+sin(4.*Pi/4.)*1_i;
+            Op.set(Two,TwoP,c2*c2);
+            Cplx c3 = cos(6.*Pi/4.)+sin(6.*Pi/4.)*1_i;
+            Op.set(Thr,ThrP,c3*c3);
+            }
+        else
         if(opname == "TauDag")
             {
             Op.set(Zer,ZerP,1);

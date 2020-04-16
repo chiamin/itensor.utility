@@ -13,41 +13,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-#ifndef __ITENSOR_Z5_H
-#define __ITENSOR_Z5_H
+#ifndef __ITENSOR_MYZ3_H
+#define __ITENSOR_MYZ3_H
 #include "itensor/mps/siteset.h"
 #include "itensor/util/str.h"
 
 namespace itensor {
 
-class Z5Site;
+class myZ3Site;
 
-using Z5 = BasicSiteSet<Z5Site>;
+using myZ3 = BasicSiteSet<myZ3Site>;
 
-class Z5Site
+class myZ3Site
     {
     Index s;
     public:
 
-    Z5Site(Index I) : s(I) { }
+    myZ3Site(Index I) : s(I) { }
 
-    Z5Site(Args const& args = Args::global())
+    myZ3Site(Args const& args = Args::global())
         {
-        auto ts = TagSet("Site,Z5");
+        auto ts = TagSet("Site,Z3");
         if( args.defined("SiteNumber") )
           ts.addTags("n="+str(args.getInt("SiteNumber")));
         if(args.getBool("ConserveQNs",true))
           {
-          s = Index(QN({"T",0,5}),1,
-                    QN({"T",1,5}),1,
-                    QN({"T",2,5}),1,
-                    QN({"T",3,5}),1,
-                    QN({"T",4,5}),1,
-                    Out,ts);
+          s = Index(QN({"T",0,3}),1,
+                    QN({"T",1,3}),1,
+                    QN({"T",2,3}),1,Out,ts);
           }
         else
           {
-          s = Index(5,ts);
+          s = Index(3,ts);
           }
         }
 
@@ -62,10 +59,6 @@ class Z5Site
         if(state == "1") { return s(2); }
         else
         if(state == "2") { return s(3); }
-        else
-        if(state == "3") { return s(4); }
-        else
-        if(state == "4") { return s(5); }
         else
             {
             Error("State " + state + " not recognized");
@@ -85,10 +78,6 @@ class Z5Site
         auto OneP = sP(2);
         auto Two = s(3);
         auto TwoP = sP(3);
-        auto Thr = s(4);
-        auto ThrP = sP(4);
-        auto Fou = s(5);
-        auto FouP = sP(5);
 
         auto Op = ITensor(dag(s),sP);
 
@@ -96,57 +85,43 @@ class Z5Site
             {
             Op.set(One,OneP,1);
             Op.set(Two,TwoP,2);
-            Op.set(Thr,ThrP,3);
-            Op.set(Fou,FouP,4);
             }
         else
         if(opname == "Sig")
             {
-            Op.set(Zer,FouP,1);
+            Op.set(Zer,TwoP,1);
             Op.set(One,ZerP,1);
             Op.set(Two,OneP,1);
-            Op.set(Thr,TwoP,1);
-            Op.set(Fou,ThrP,1);
             }
         else
         if(opname == "SigDag")
             {
-            Op.set(Fou,ZerP,1);
+            Op.set(Two,ZerP,1);
             Op.set(Zer,OneP,1);
             Op.set(One,TwoP,1);
-            Op.set(Two,ThrP,1);
-            Op.set(Thr,FouP,1);
             }
         else
         if(opname == "Tau")
             {
             Op.set(Zer,ZerP,1);
-            Op.set(One,OneP,cos(2.*Pi/5.)+sin(2.*Pi/5.)*1_i);
-            Op.set(Two,TwoP,cos(4.*Pi/5.)+sin(4.*Pi/5.)*1_i);
-            Op.set(Thr,ThrP,cos(6.*Pi/5.)+sin(6.*Pi/5.)*1_i);
-            Op.set(Fou,FouP,cos(8.*Pi/5.)+sin(8.*Pi/5.)*1_i);
+            Op.set(One,OneP,cos(2.*Pi/3.)+sin(2.*Pi/3.)*1_i);
+            Op.set(Two,TwoP,cos(4.*Pi/3.)+sin(4.*Pi/3.)*1_i);
             }
         else
         if(opname == "TauSqr")
             {
             Op.set(Zer,ZerP,1);
-            Cplx c1 = cos(2.*Pi/5.)+sin(2.*Pi/5.)*1_i;
-            Cplx c2 = cos(4.*Pi/5.)+sin(4.*Pi/5.)*1_i;
-            Cplx c3 = cos(6.*Pi/5.)+sin(6.*Pi/5.)*1_i;
-            Cplx c4 = cos(8.*Pi/5.)+sin(8.*Pi/5.)*1_i;
-            Op.set(One,OneP,c1*c1);
+            Cplx c = cos(2.*Pi/3.)+sin(2.*Pi/3.)*1_i;
+            Op.set(One,OneP,c*c);
+            Cplx c2 = cos(4.*Pi/3.)+sin(4.*Pi/3.)*1_i;
             Op.set(Two,TwoP,c2*c2);
-            Op.set(Thr,ThrP,c3*c3);
-            Op.set(Fou,FouP,c4*c4);
             }
         else
         if(opname == "TauDag")
             {
             Op.set(Zer,ZerP,1);
-            Op.set(One,OneP,cos(2.*Pi/5.)-sin(2.*Pi/5.)*1_i);
-            Op.set(Two,TwoP,cos(4.*Pi/5.)-sin(4.*Pi/5.)*1_i);
-            Op.set(Thr,ThrP,cos(6.*Pi/5.)-sin(6.*Pi/5.)*1_i);
-            Op.set(Fou,FouP,cos(8.*Pi/5.)-sin(8.*Pi/5.)*1_i);
+            Op.set(One,OneP,cos(2.*Pi/3.)-sin(2.*Pi/3.)*1_i);
+            Op.set(Two,TwoP,cos(4.*Pi/3.)-sin(4.*Pi/3.)*1_i);
             }
         else
         if(opname == "Proj0")
@@ -164,16 +139,6 @@ class Z5Site
             Op.set(Two,TwoP,1);
             }
         else
-        if(opname == "Proj3")
-            {
-            Op.set(Thr,ThrP,1);
-            }
-        else
-        if(opname == "Proj4")
-            {
-            Op.set(Fou,FouP,1);
-            }
-        else
             {
             Error("Operator \"" + opname + "\" name not recognized");
             }
@@ -185,9 +150,9 @@ class Z5Site
     // Deprecated, for backwards compatibility
     //
 
-    Z5Site(int n, Args const& args = Args::global())
+    myZ3Site(int n, Args const& args = Args::global())
         {
-        *this = Z5Site({args,"SiteNumber=",n});
+        *this = myZ3Site({args,"SiteNumber=",n});
         }
 
     };
