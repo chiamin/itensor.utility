@@ -86,7 +86,7 @@ GaugeLadder :: GaugeLadder (int L, bool lrough_, bool rrough_)
     bool xpbc = false, ypbc = false;
     _charges.resize (_N_charge+1);
 
-    int i_flux = 1;
+    int i_flux = (lrough_ ? 3 : 1); // If lrough==true, reserve the i_flux=1 and 2 for the left rough boundary
     for(int x = 1; x <= L; x++)
     {
         for(int y = 1; y <= 2; y++)
@@ -126,21 +126,13 @@ GaugeLadder :: GaugeLadder (int L, bool lrough_, bool rrough_)
                     opp_dir = 0;                            // left; defined in <ChargeSite>
                 }
                 // If neighbor NOT in the lattice,
-                // 1. keep <nb_i_charge> = -1
-                // 2. set <nb_flux> = -1, except for the rough boundaries
+                // 1. <nb_i_charge> = -1
+                // 2. <nb_flux> = -1
                 int nb_i_charge, nb_flux;
                 if (!nb_in_latt)
                 {
                     nb_i_charge = -1;
-                    if ((x == 1 && _lrough && dir == "l")
-                    ||  (x == L && _rrough && dir == "r"))
-                    {
-                        nb_flux = i_flux++;
-                    }
-                    else
-                    {
-                        nb_flux = -1;
-                    }
+                    nb_flux = -1;
                 }
                 // If neighbor in the lattice,
                 // 1. store the neighboring charge in <nb_i_charge>
@@ -165,6 +157,12 @@ GaugeLadder :: GaugeLadder (int L, bool lrough_, bool rrough_)
                 charges.push_back (nb_i_charge);
                 flux.push_back (nb_flux);
             }
+            // Set the rough boundaries
+            if (x == 1 && _lrough)
+                flux.at(0) = y;                 // left flux
+            else if (x == L && _rrough)
+                flux.at(3) = flux.at(0)+3;      // right flux
+
             _charges.at(i_charge) = ChargeSite (i_charge, x, y,
                                                 charges.at(0), charges.at(3), charges.at(2), charges.at(1),
                                                 flux.at(0), flux.at(3), flux.at(2), flux.at(1));
@@ -176,11 +174,11 @@ GaugeLadder :: GaugeLadder (int L, bool lrough_, bool rrough_)
 // Return the gauge fluxes in the plaques
 // The labeling of charge and gauge flux
 //
-//        (4)--2--(5)--4--(8)--6--(11)--8--(14)
+//        (2)--2--(5)--4--(8)--6--(11)--8--(14)
 //             |       |       |        |
-// rough      (2)     (6)     (9)     (12)       rough
+// rough      (3)     (6)     (9)     (12)       rough
 //             |       |       |        |
-//        (1)--1--(3)--3--(7)--5--(10)--7--(13)
+//        (1)--1--(4)--3--(7)--5--(10)--7--(13)
 //
 //            2--(3)--4--(6)--6--(9)--8
 //            |       |       |       |
@@ -196,7 +194,7 @@ vector<NeighborData> GaugeLadder :: plaques () const
     int L = this->_L;
 
     // left most
-    int iL = SL::mix_ind (1, y, L, 2);
+    int iL = SL::mix_ind (1, y, L, 2);  // x,y = 1,1
     const auto& charge_L = this->charges().at(iL);
     if (charge_L.left_flux() != -1) // left rough boundary
     {
