@@ -10,7 +10,7 @@ class ChargeSite
     public:
         ChargeSite () {}
         ChargeSite (int i_, int x_, int y_, int lc, int rc, int uc, int dc, int lf, int rf, int uf, int df)
-        : _i(i_), _x(x_), _y(y_)
+        : _x(x_), _y(y_), _i(i_)
         , _nb_flux ({lf,df,rf,uf})
         , _nb_i_charges ({lc,dc,rc,uc})
         {}
@@ -65,8 +65,11 @@ class GaugeLadder
               vector<NeighborData> plaques   () const;
               vector<NeighborData> vertecies () const;
 
-        const ChargeSite& charge_dn (int x) const { return _charges.at(x*2-1); }
-        const ChargeSite& charge_up (int x) const { return _charges.at(x*2); }
+              int           charge_ind (int x, int y) const;
+              NeighborData  vertex     (int charge_ind) const;
+
+        const ChargeSite&   charge_dn  (int x) const  { return _charges.at(x*2-1); }
+        const ChargeSite&   charge_up  (int x) const  { return _charges.at(x*2); }
 
     private:
         int _L, _N_flux, _N_charge;
@@ -244,22 +247,38 @@ vector<NeighborData> GaugeLadder :: plaques () const
     return pqs;
 }
 
+
+inline NeighborData GaugeLadder :: vertex (int charge_ind) const
+{
+    const auto& charge = this->charges().at(charge_ind);
+    vector<int> lrud (4);
+    lrud.at(0) = charge.left_flux();
+    lrud.at(1) = charge.right_flux();
+    lrud.at(2) = charge.up_flux();
+    lrud.at(3) = charge.down_flux();
+    return NeighborData (lrud);
+}
+
 // Return the gauge fluxes in the vertices in the left, right, up, down order
 // If a direction does not have gauge flux, the value is -1
 // Otherwise the value is the label index
-vector<NeighborData> GaugeLadder :: vertecies () const
+inline vector<NeighborData> GaugeLadder :: vertecies () const
 {
     vector<NeighborData> vts;
-    vector<int> lrud (4);
     for(int i = 1; i <= this->Nc(); i++)
     {
-        const auto& charge = this->charges().at(i);
-        lrud.at(0) = charge.left_flux();
-        lrud.at(1) = charge.right_flux();
-        lrud.at(2) = charge.up_flux();
-        lrud.at(3) = charge.down_flux();
-        vts.push_back (NeighborData(lrud));
+        vts.push_back (this->vertex(i));
     }
     return vts;
+}
+
+inline int GaugeLadder :: charge_ind (int x, int y) const
+{
+    if (!(y == 1 || y == 2) || x < 1 || x > _L)
+    {
+        cout << "Error: " << __FUNCTION__ << ": invalid x,y. Input x,y = " << x << "," << y << endl;
+        throw;
+    }
+    return (y == 1 ? x*2-1 : x*2);
 }
 #endif

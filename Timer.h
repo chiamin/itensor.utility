@@ -54,7 +54,12 @@ class Timers
         void    start           ()              { _main.start(); _start = true; }
         bool    print           (bool force_print = false);
         bool    started         () const        { return _start; }
-        Timer&  operator[]      (string name)   { return _timers[name]; }
+        Timer&  operator[]      (string name)
+        {
+            if (_timers.count(name) == 0)
+                this->add (name);
+            return _timers[name];
+        }
         void    add             (string name)
         {
             //_timers.push_back (&timer);

@@ -4,6 +4,8 @@
 #include <iostream>
 using std::vector, std::ostream;
 
+namespace vectool {
+
 template <typename T>
 ostream& operator<< (ostream& os, const vector<T>& v)
 {
@@ -45,10 +47,20 @@ inline tuple<bool,int> find_vector_re_index (const vector<T>& v, const T& key)
 }
 
 template <typename T>
-inline vector<T> combine_vector (vector<T> v, const vector<T>& v2)
+inline vector<T> combine_vector (const vector<T>& v1, const vector<T>& v2)
 {
-    v.insert (v.end(), v2.begin(), v2.end());
-    return v;
+    vector<T> re;
+    re.reserve (v1.size() + v2.size());
+    re = v1;
+    re.insert (re.end(), v2.begin(), v2.end());
+    return re;
+}
+
+template <typename T>
+inline vector<T> sub_vector (const vector<T>& v, int i1, int i2)
+{
+    assert (i1 >= 0 && i1 < v.size() && i2 >= i1 && i2 < v.size());
+    return vector<T> (v.begin()+i1, v.begin()+i2);
 }
 
 template <typename T>
@@ -88,4 +100,26 @@ inline auto max_value (const vector<T>& v)
 {
     return max_element(v.begin(), v.end());
 }
+
+template <typename T>
+inline void unordered_remove (vector<T>& v, const T& x)
+{
+    auto it = v.begin();
+    while (it != v.end())
+    {
+        if (*it == x)
+        {
+            auto it_end = v.end() - 1;
+            if (it != it_end)
+            {
+                *it = std::move(*it_end);
+            }
+            v.pop_back();
+            continue;
+        }
+        ++it;
+    }
+}
+
+} // end of namespace
 #endif

@@ -7,23 +7,22 @@ using namespace std;
 
 tuple <vector<vector<int>>, vector<int>> get_permutations (const vector<int>& pos)
 // <pos> is assumed to be sorted
-// Return 1) all the permutations of pos. 2) the Fermionic sign for each permutation
+// Return 1) all the permutations of pos. 2) the number of neighboring swaps required
 // The size of pos can be 2, 3, or 4
 // Did not care about the efficiency; can be slow.
 {
     assert (pos.size() >=2 && pos.size() <= 4);
 
     vector<vector<int>> re;
-    vector<int> signs;
+    vector<int> swaps;
 
-    auto add_permute = [&re, &signs] (const vector<int>& ppos)
+    auto add_permute = [&re, &swaps] (const vector<int>& ppos)
     {
         if (!in_vector (re, ppos))
         {
             re.push_back (ppos);
             int nswap = countSwaps (ppos);
-            int sign = (nswap % 2 == 0 ? 1 : -1);
-            signs.push_back (sign);
+            swaps.push_back (nswap);
         }
     };
 
@@ -66,7 +65,7 @@ tuple <vector<vector<int>>, vector<int>> get_permutations (const vector<int>& po
             }
         }
     }
-    return {re, signs};
+    return {re, swaps};
 }
 
 class PermutTable
@@ -79,7 +78,7 @@ class PermutTable
 
     private:
         // Key: site positions
-        // Value: 1) all the permutations, 2) corresponding signs
+        // Value: 1) all the permutations, 2) corresponding number of swaps
         map <vector<int>, tuple <vector<vector<int>>, vector<int>>> _ptable;
 };
 
@@ -105,7 +104,7 @@ tuple <vector<vector<int>>, vector<int>> PermutTable :: permut (const vector<int
     // This would be less efficient than return the representations, and then convert each of them to positions in the loop outside.
     // However it is conceptually simpler, and may not be important in the whole algorithm.
     // Optimize if found necessary.
-    auto [permut_poss, signs] = _ptable.at (rep);
+    auto [permut_poss, swaps] = _ptable.at (rep);
     for(auto& ppos : permut_poss)
     {
         for(int& pi : ppos)
@@ -114,6 +113,6 @@ tuple <vector<vector<int>>, vector<int>> PermutTable :: permut (const vector<int
         }
     }
 
-    return {permut_poss, signs};
+    return {permut_poss, swaps};
 }
 #endif

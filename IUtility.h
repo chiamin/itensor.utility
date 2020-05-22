@@ -7,6 +7,22 @@ using namespace itensor;
 
 // For ITensor3
 
+inline ITensor Identity (const Index& ii)
+{
+    ITensor id (dag(ii), prime(ii));
+    for(int i = 1; i <= ii.dim(); i++)
+        id.set (i,i,1.);
+    return id;
+}
+
+inline int dim (const ITensor& T)
+{
+    int d = 1;
+    for(const auto& ii : T.inds())
+        d *= ii.dim();
+    return d;
+}
+
 vector<ITensor> get_REs (const MPS& mps)
 {
     int N = length (mps);
@@ -41,7 +57,12 @@ ITensor parity_sign_tensor (const Index& ii)
     for(int i = 1; i <= nblock(ii); i++)
     // For each QN block
     {
-        Real a = (qn(ii,i).val("Nf") % 2 == 1 ? -1. : 1.);
+        Real a = 1.;
+        if (qn(ii,i).hasName("Nf"))
+            a = (qn(ii,i).val("Nf") % 2 == 1 ? -1. : 1.);
+        else if (qn(ii,i).hasName("Pf"))
+            a = (qn(ii,i).val("Pf") % 2 == 1 ? -1. : 1.);
+
         int bsize = blocksize (ii, i);
         for(int j = 1; j <= bsize; j++)
         // For each element in the block
@@ -88,28 +109,51 @@ inline void contract_transfer (ITensor& E, const MPS& mps, int i, const SitesT& 
     E *= dag(prime(mps(i),"Link"));
 }
 
+inline ITensor merge_onsite_operators (const SiteSet& sites, int i, const vector<string>& ops)
+{
+    ITensor op_all (1.);
+    for(int j = ops.size()-1; j >= 0; j--)
+    {
+        const auto& op = ops.at(j);
+        if (op == "") continue;
+        op_all *= prime (sites.op(op,i));
+        op_all.mapPrime(1,0);
+        op_all.mapPrime(2,1);
+    }
+    return op_all;
+}
+
+inline void apply_onsite_ops (ITensor& A, const SiteSet& sites, int i, const vector<string>& ops)
+{
+    assert (hasIndex (A, sites(i)));
+
+    ITensor op_all = merge_onsite_operators (sites, i, ops);
+    A *= op_all;
+    A.mapPrime(1,0);
+}
+
+inline void apply_fermionic_sign (ITensor& A, const Index& iL)
+{
+    // Fermionic sign
+    auto F = parity_sign_tensor (iL);
+    A *= F;
+    A.noPrime();
+}
+
 void contract_transfer_matrix (ITensor& re, const SiteSet& sites, const MPS& mps, int i, const vector<string>& ops, Direction close, bool fermionic)
 // The operators are applied in the reversed order in <ops>
 {
     assert (close != BothDir);
 
     ITensor A = mps(i);
-    for(int j = ops.size()-1; j >= 0; j--)
-    {
-        const auto& op = ops.at(j);
-        if (op == "") continue;
-        A *= sites.op(op,i);
-        A.noPrime();
-    }
+    apply_onsite_ops (A, sites, i, ops);
     if (fermionic)
     {
         if (ops.size() % 2 != 0 && i != 1)
         {
             // Fermionic sign
             auto iL = leftLinkIndex (mps, i);
-            auto F = parity_sign_tensor (iL);
-            A *= F;
-            A.noPrime();
+            apply_fermionic_sign (A, iL);
         }
     }
 
