@@ -1,9 +1,9 @@
 #include <string>
 using namespace std;
 
-inline bool find (string str, string toFind)
+inline bool inStr (string str, string key)
 {
-    size_t pos = str.find (toFind);
+    size_t pos = str.find (key);
     return !(pos == std::string::npos);
 }
 
@@ -16,4 +16,18 @@ inline void eraseSubStr (string& mainStr, const string& toErase)
 		// If found then erase it from string
 		mainStr.erase(pos, toErase.length());
 	}
+}
+
+inline vector<string> splitStr (string str, const string& delimiter)
+{
+    vector<string> re;
+	size_t pos = str.find (delimiter);
+    while (pos != string::npos)
+    {
+        re.push_back (str.substr (0, pos));
+        str = str.substr (pos + delimiter.size());
+        pos = str.find (delimiter);
+    }
+    re.push_back (str);
+    return re;
 }
