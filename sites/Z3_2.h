@@ -89,23 +89,23 @@ class myZ3Site
         else
         if(opname == "Tau")
             {
+            Op.set(Zer,OneP,1);
+            Op.set(One,TwoP,1);
+            Op.set(Two,ZerP,1);
+            }
+        else
+        if(opname == "TauSqr")
+            {
             Op.set(Zer,TwoP,1);
             Op.set(One,ZerP,1);
             Op.set(Two,OneP,1);
             }
         else
-        if(opname == "TauSqr")
-            {
-            Op.set(Zer,OneP,1);
-            Op.set(One,TwoP,1);
-            Op.set(Two,ZerP,1);
-            }
-        else
         if(opname == "TauDag")
             {
-            Op.set(Two,ZerP,1);
-            Op.set(Zer,OneP,1);
-            Op.set(One,TwoP,1);
+            Op.set(Zer,TwoP,1);
+            Op.set(One,ZerP,1);
+            Op.set(Two,OneP,1);
             }
         else
         if(opname == "Sig")

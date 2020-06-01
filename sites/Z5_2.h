@@ -102,28 +102,28 @@ class Z5Site
         else
         if(opname == "Tau")
             {
-            Op.set(Zer,FouP,1);
-            Op.set(One,ZerP,1);
-            Op.set(Two,OneP,1);
-            Op.set(Thr,TwoP,1);
-            Op.set(Fou,ThrP,1);
-            }
-        else
-        if(opname == "TauSqr")
-            {
-            Op.set(Zer,ThrP,1);
-            Op.set(One,FouP,1);
-            Op.set(Two,ZerP,1);
-            Op.set(Thr,OneP,1);
-            Op.set(Fou,TwoP,1);
-            }
-        else
-        if(opname == "TauDag")
-            {
             Op.set(Fou,ZerP,1);
             Op.set(Zer,OneP,1);
             Op.set(One,TwoP,1);
             Op.set(Two,ThrP,1);
+            Op.set(Thr,FouP,1);
+            }
+        else
+        if(opname == "TauSqr")
+            {
+            Op.set(Thr,ZerP,1);
+            Op.set(Fou,OneP,1);
+            Op.set(Zer,TwoP,1);
+            Op.set(One,ThrP,1);
+            Op.set(Two,FouP,1);
+            }
+        else
+        if(opname == "TauDag")
+            {
+            Op.set(Zer,FouP,1);
+            Op.set(One,ZerP,1);
+            Op.set(Two,OneP,1);
+            Op.set(Thr,TwoP,1);
             Op.set(Thr,FouP,1);
             }
         else
