@@ -13,25 +13,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-#ifndef __ITENSOR_Z4_H
-#define __ITENSOR_Z4_H
+#ifndef __ITENSOR_Z4_tauDiag_H
+#define __ITENSOR_Z4_tauDiag_H
 #include "itensor/mps/siteset.h"
 #include "itensor/util/str.h"
 
 namespace itensor {
 
-class Z4Site;
+class Z4_tauDiagSite;
 
-using Z4 = BasicSiteSet<Z4Site>;
+using Z4_tauDiag = BasicSiteSet<Z4_tauDiagSite>;
 
-class Z4Site
+class Z4_tauDiagSite
     {
     Index s;
     public:
 
-    Z4Site(Index I) : s(I) { }
+    Z4_tauDiagSite(Index I) : s(I) { }
 
-    Z4Site(Args const& args = Args::global())
+    Z4_tauDiagSite(Args const& args = Args::global())
         {
         auto ts = TagSet("Site,Z4");
         if( args.defined("SiteNumber") )
@@ -168,9 +168,9 @@ class Z4Site
     // Deprecated, for backwards compatibility
     //
 
-    Z4Site(int n, Args const& args = Args::global())
+    Z4_tauDiagSite(int n, Args const& args = Args::global())
         {
-        *this = Z4Site({args,"SiteNumber=",n});
+        *this = Z4_tauDiagSite({args,"SiteNumber=",n});
         }
 
     };

@@ -13,38 +13,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-#ifndef __ITENSOR_MYZ3_H
-#define __ITENSOR_MYZ3_H
+#ifndef __ITENSOR_Z4_sigDiag_H
+#define __ITENSOR_Z4_sigDiag_H
 #include "itensor/mps/siteset.h"
 #include "itensor/util/str.h"
 
 namespace itensor {
 
-class myZ3Site;
+class Z4_sigDiagSite;
 
-using myZ3 = BasicSiteSet<myZ3Site>;
+using Z4_sigDiag = BasicSiteSet<Z4_sigDiagSite>;
 
-class myZ3Site
+class Z4_sigDiagSite
     {
     Index s;
     public:
 
-    myZ3Site(Index I) : s(I) { }
+    Z4_sigDiagSite(Index I) : s(I) { }
 
-    myZ3Site(Args const& args = Args::global())
+    Z4_sigDiagSite(Args const& args = Args::global())
         {
-        auto ts = TagSet("Site,Z3");
+        auto ts = TagSet("Site,Z4");
         if( args.defined("SiteNumber") )
           ts.addTags("n="+str(args.getInt("SiteNumber")));
         if(args.getBool("ConserveQNs",true))
           {
-          s = Index(QN({"T",0,3}),1,
-                    QN({"T",1,3}),1,
-                    QN({"T",2,3}),1,Out,ts);
+          s = Index(QN({"T",0,4}),1,
+                    QN({"T",1,4}),1,
+                    QN({"T",2,4}),1,
+                    QN({"T",3,4}),1,
+                    Out,ts);
           }
         else
           {
-          s = Index(3,ts);
+          s = Index(4,ts);
           }
         }
 
@@ -59,6 +61,8 @@ class myZ3Site
         if(state == "1") { return s(2); }
         else
         if(state == "2") { return s(3); }
+        else
+        if(state == "3") { return s(4); }
         else
             {
             Error("State " + state + " not recognized");
@@ -78,6 +82,8 @@ class myZ3Site
         auto OneP = sP(2);
         auto Two = s(3);
         auto TwoP = sP(3);
+        auto Thr = s(4);
+        auto ThrP = sP(4);
 
         auto Op = ITensor(dag(s),sP);
 
@@ -85,43 +91,58 @@ class myZ3Site
             {
             Op.set(One,OneP,1);
             Op.set(Two,TwoP,2);
-            }
-        else
-        if(opname == "Sig")
-            {
-            Op.set(Zer,TwoP,1);
-            Op.set(One,ZerP,1);
-            Op.set(Two,OneP,1);
-            }
-        else
-        if(opname == "SigDag")
-            {
-            Op.set(Two,ZerP,1);
-            Op.set(Zer,OneP,1);
-            Op.set(One,TwoP,1);
+            Op.set(Thr,ThrP,3);
             }
         else
         if(opname == "Tau")
             {
-            Op.set(Zer,ZerP,1);
-            Op.set(One,OneP,cos(2.*Pi/3.)+sin(2.*Pi/3.)*1_i);
-            Op.set(Two,TwoP,cos(4.*Pi/3.)+sin(4.*Pi/3.)*1_i);
+            Op.set(Zer,OneP,1);
+            Op.set(One,TwoP,1);
+            Op.set(Two,ThrP,1);
+            Op.set(Thr,ZerP,1);
             }
         else
         if(opname == "TauSqr")
             {
-            Op.set(Zer,ZerP,1);
-            Cplx c = cos(2.*Pi/3.)+sin(2.*Pi/3.)*1_i;
-            Op.set(One,OneP,c*c);
-            Cplx c2 = cos(4.*Pi/3.)+sin(4.*Pi/3.)*1_i;
-            Op.set(Two,TwoP,c2*c2);
+            Op.set(Zer,TwoP,1);
+            Op.set(One,ThrP,1);
+            Op.set(Two,ZerP,1);
+            Op.set(Thr,OneP,1);
             }
         else
         if(opname == "TauDag")
             {
+            Op.set(Zer,ThrP,1);
+            Op.set(One,ZerP,1);
+            Op.set(Two,OneP,1);
+            Op.set(Thr,TwoP,1);
+            }
+        else
+        if(opname == "Sig")
+            {
             Op.set(Zer,ZerP,1);
-            Op.set(One,OneP,cos(2.*Pi/3.)-sin(2.*Pi/3.)*1_i);
-            Op.set(Two,TwoP,cos(4.*Pi/3.)-sin(4.*Pi/3.)*1_i);
+            Op.set(One,OneP,cos(2.*Pi/4.)+sin(2.*Pi/4.)*1_i);
+            Op.set(Two,TwoP,cos(4.*Pi/4.)+sin(4.*Pi/4.)*1_i);
+            Op.set(Thr,ThrP,cos(6.*Pi/4.)+sin(6.*Pi/4.)*1_i);
+            }
+        else
+        if(opname == "SigSqr")
+            {
+            Op.set(Zer,ZerP,1);
+            Cplx c = cos(2.*Pi/4.)+sin(2.*Pi/4.)*1_i;
+            Op.set(One,OneP,c*c);
+            Cplx c2 = cos(4.*Pi/4.)+sin(4.*Pi/4.)*1_i;
+            Op.set(Two,TwoP,c2*c2);
+            Cplx c3 = cos(6.*Pi/4.)+sin(6.*Pi/4.)*1_i;
+            Op.set(Thr,ThrP,c3*c3);
+            }
+        else
+        if(opname == "SigDag")
+            {
+            Op.set(Zer,ZerP,1);
+            Op.set(One,OneP,cos(2.*Pi/4.)-sin(2.*Pi/4.)*1_i);
+            Op.set(Two,TwoP,cos(4.*Pi/4.)-sin(4.*Pi/4.)*1_i);
+            Op.set(Thr,ThrP,cos(6.*Pi/4.)-sin(6.*Pi/4.)*1_i);
             }
         else
         if(opname == "Proj0")
@@ -139,6 +160,11 @@ class myZ3Site
             Op.set(Two,TwoP,1);
             }
         else
+        if(opname == "Proj3")
+            {
+            Op.set(Thr,ThrP,1);
+            }
+        else
             {
             Error("Operator \"" + opname + "\" name not recognized");
             }
@@ -150,9 +176,9 @@ class myZ3Site
     // Deprecated, for backwards compatibility
     //
 
-    myZ3Site(int n, Args const& args = Args::global())
+    Z4_sigDiagSite(int n, Args const& args = Args::global())
         {
-        *this = myZ3Site({args,"SiteNumber=",n});
+        *this = Z4_sigDiagSite({args,"SiteNumber=",n});
         }
 
     };
