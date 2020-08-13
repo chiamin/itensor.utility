@@ -124,7 +124,7 @@ class Z5_sigDiagSite
             Op.set(One,ZerP,1);
             Op.set(Two,OneP,1);
             Op.set(Thr,TwoP,1);
-            Op.set(Thr,FouP,1);
+            Op.set(Fou,ThrP,1);
             }
         else
         if(opname == "Sig")
