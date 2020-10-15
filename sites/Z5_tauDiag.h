@@ -109,6 +109,15 @@ class Z5_tauDiagSite
             Op.set(Fou,ThrP,1);
             }
         else
+        if(opname == "SigSqr")
+            {
+            Op.set(Zer,ThrP,1);
+            Op.set(One,FouP,1);
+            Op.set(Two,ZerP,1);
+            Op.set(Thr,OneP,1);
+            Op.set(Fou,TwoP,1);
+            }
+        else
         if(opname == "SigDag")
             {
             Op.set(Fou,ZerP,1);
