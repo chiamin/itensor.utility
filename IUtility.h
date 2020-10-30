@@ -7,9 +7,59 @@ using namespace itensor;
 
 // For ITensor3
 
+// Contract <ten1> and <ten2> by the tags in <tags1> and <tags2>
+void auto_contractEqual_by_tag (ITensor& ten1, const ITensor& ten2, const vector<string>& tags1, const vector<string>& tags2)
+{
+    for(int i = 0; i < tags1.size(); i++)
+    {
+        auto tag1 = tags1.at(i);
+        auto tag2 = tags2.at(i);
+        auto ii1  = findIndex (ten1, tag1);
+        auto ii2  = findIndex (ten2, tag2);
+        if (ii1 != ii2)
+            ten1 *= dag(delta(ii1,ii2));
+    }
+    ten1 *= ten2;
+}
+
+inline ITensor auto_contract_by_tag (ITensor ten1, const ITensor& ten2, const vector<string>& tags1, const vector<string>& tags2)
+{
+    auto_contractEqual_by_tag (ten1, ten2, tags1, tags2);
+    return ten1;
+}
+
+// Add <ten1> and <ten2> by the tags in <tags1> and <tags2>
+void auto_addEqual_by_tag (ITensor& ten1, const ITensor& ten2, const vector<string>& tags1, const vector<string>& tags2)
+{
+    for(int i = 0; i < tags1.size(); i++)
+    {
+        auto tag1 = tags1.at(i);
+        auto tag2 = tags2.at(i);
+        auto ii1  = findIndex (ten1, tag1);
+        auto ii2  = findIndex (ten2, tag2);
+        ten1.replaceInds ({ii1},{ii2});
+    }
+    ten1 += ten2;
+}
+
+// Add <ten1> and <ten2> by the tags in <tags1> and <tags2>
+inline ITensor auto_add_by_tag (ITensor ten1, const ITensor& ten2, const vector<string>& tags1, const vector<string>& tags2)
+{
+    auto_addEqual_by_tag (ten1, ten2, tags1, tags2);
+    return ten1;
+}
+
 inline ITensor Identity (const Index& ii)
 {
     ITensor id (dag(ii), prime(ii));
+    for(int i = 1; i <= ii.dim(); i++)
+        id.set (i,i,1.);
+    return id;
+}
+
+inline ITensor Identity (const Index& ii, const Index& iip)
+{
+    ITensor id (ii, iip);
     for(int i = 1; i <= ii.dim(); i++)
         id.set (i,i,1.);
     return id;

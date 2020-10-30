@@ -136,6 +136,17 @@ class Z5_tauDiagSite
             Op.set(Fou,FouP,cos(8.*Pi/5.)+sin(8.*Pi/5.)*1_i);
             }
         else
+        if (opname == "LogTau")
+            {
+            Real a = 1.25663706;
+            Real b = 2.51327412;
+            Op.set(Zer,ZerP, 0);
+            Op.set(One,OneP,-a);
+            Op.set(Two,TwoP,-b);
+            Op.set(Thr,ThrP, b);
+            Op.set(Fou,FouP, a);
+            }
+        else
         if(opname == "TauSqr")
             {
             Op.set(Zer,ZerP,1);

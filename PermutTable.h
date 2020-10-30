@@ -9,7 +9,7 @@ tuple <vector<vector<int>>, vector<int>> get_permutations (const vector<int>& po
 // <pos> is assumed to be sorted
 // Return 1) all the permutations of pos. 2) the number of neighboring swaps required
 // The size of pos can be 2, 3, or 4
-// Did not care about the efficiency; can be slow.
+// Did not care about the efficiency. Can be slow.
 {
     assert (pos.size() >=2 && pos.size() <= 4);
 

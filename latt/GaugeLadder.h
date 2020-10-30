@@ -46,6 +46,7 @@ class NeighborData
         int r () const { return p.at(1); }
         int u () const { return p.at(2); }
         int d () const { return p.at(3); }
+        const vector<int>& nbs () const { return p; }
     private:
         vector<int> p;
 };

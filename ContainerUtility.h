@@ -2,7 +2,7 @@
 #define __CONTAINER_UTILITY_H_CMC__
 #include <vector>
 #include <iostream>
-using std::vector, std::ostream;
+using std::vector, std::ostream, std::tuple;
 
 namespace vectool {
 

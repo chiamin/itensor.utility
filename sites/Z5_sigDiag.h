@@ -109,6 +109,17 @@ class Z5_sigDiagSite
             Op.set(Thr,FouP,1);
             }
         else
+        if (opname == "LogTau")
+            {
+            Real a = 1.06895933e+00;
+            Real b = 6.60653200e-01;
+            Op.set(Zer,ZerP, 0);  Op.set(Zer,OneP, a);  Op.set(Zer,TwoP,-b);   Op.set(Zer,ThrP, b);  Op.set(Zer,FouP,-a);
+            Op.set(One,ZerP,-a);  Op.set(One,OneP, 0);  Op.set(One,TwoP, a);   Op.set(One,ThrP,-b);  Op.set(One,FouP, b);
+            Op.set(Two,ZerP, b);  Op.set(Two,OneP,-a);  Op.set(Two,TwoP, 0);   Op.set(Two,ThrP, a);  Op.set(Two,FouP,-b);
+            Op.set(Thr,ZerP,-b);  Op.set(Thr,OneP, b);  Op.set(Thr,TwoP,-a);   Op.set(Thr,ThrP, 0);  Op.set(Thr,FouP, a);
+            Op.set(Fou,ZerP, a);  Op.set(Fou,OneP,-b);  Op.set(Fou,TwoP, b);   Op.set(Fou,ThrP,-a);  Op.set(Fou,FouP, 0);
+            }
+        else
         if(opname == "TauSqr")
             {
             Op.set(Thr,ZerP,1);
