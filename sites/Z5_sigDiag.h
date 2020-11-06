@@ -118,6 +118,16 @@ class Z5_sigDiagSite
             Op.set(Two,ZerP, b);  Op.set(Two,OneP,-a);  Op.set(Two,TwoP, 0);   Op.set(Two,ThrP, a);  Op.set(Two,FouP,-b);
             Op.set(Thr,ZerP,-b);  Op.set(Thr,OneP, b);  Op.set(Thr,TwoP,-a);   Op.set(Thr,ThrP, 0);  Op.set(Thr,FouP, a);
             Op.set(Fou,ZerP, a);  Op.set(Fou,OneP,-b);  Op.set(Fou,TwoP, b);   Op.set(Fou,ThrP,-a);  Op.set(Fou,FouP, 0);
+
+/*            Cplx r1 = 8.64806266e-01;
+            Cplx r2 = 2.04153066e-01;
+            Cplx i1 = 2.51327412*1_i;
+            Cplx i2 = 0.62831853*1_i;
+            Op.set(Zer,ZerP, i1);  Op.set(Zer,OneP, -r1-i2);  Op.set(Zer,TwoP,-r2-i2);   Op.set(Zer,ThrP, r2-i2);  Op.set(Zer,FouP,r1-i2);
+            Op.set(One,ZerP, r1-i2);  Op.set(One,OneP, i1);  Op.set(One,TwoP, -r1-i2);   Op.set(One,ThrP, -r2-i2);  Op.set(One,FouP, r2-i2);
+            Op.set(Two,ZerP, r2-i2);  Op.set(Two,OneP, r1-i2);  Op.set(Two,TwoP, i1);   Op.set(Two,ThrP, -r1-i2);  Op.set(Two,FouP,-r2-i2);
+            Op.set(Thr,ZerP,-r2-i2);  Op.set(Thr,OneP, r2-i2);  Op.set(Thr,TwoP,r1-i2);   Op.set(Thr,ThrP, i1);  Op.set(Thr,FouP, -r1-i2);
+            Op.set(Fou,ZerP, -r1-i2);  Op.set(Fou,OneP,-r2-i2);  Op.set(Fou,TwoP, r2-i2);   Op.set(Fou,ThrP,r1-i2);  Op.set(Fou,FouP, i1);*/
             }
         else
         if(opname == "TauSqr")
