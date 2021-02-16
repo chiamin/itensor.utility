@@ -1,11 +1,299 @@
 #ifndef __ITENSORUTILITY_H_CMC__
 #define __ITENSORUTILITY_H_CMC__
 #include <vector>
+#include <unordered_map>
 #include "itensor/all.h"
+#include "ReadInput.h"
 using namespace std;
 using namespace itensor;
 
 // For ITensor3
+
+// Use iprint
+#define iprint(name) myprinter(#name, (name))
+template <typename TType>
+void myprinter (string name, const TType& value)
+{
+    cout << name << endl;
+    if constexpr (is_same_v <TType, ITensor>)
+        cout << "is real = " << isReal(value) << endl;
+    cout << value << endl;
+}
+
+inline Real toReal (const ITensor& T)
+{
+    if (!isReal(T))
+    {
+        auto val = eltC(T);
+        if (val.imag() < 1e-15)
+        {
+            return val.real();
+        }
+        else
+        {
+            cout << "Failed: " << __FUNCTION__ << ": " << val << endl;
+            throw;
+        }
+    }
+    else
+    {
+        return elt(T);
+    }
+}
+
+ITensor copy_diagITensor (const ITensor& T, const IndexSet& inds)
+{
+    assert (order(T) == order(inds));
+    assert (order(T) == 2);
+    assert (T.inds()(1).dim() == T.inds()(2).dim());
+
+    if (isReal (T))
+    {
+        vector<Real> elts;
+        auto get_elt = [&elts] (Real r)
+        {
+            elts.push_back (r);
+        };
+        T.visit (get_elt);
+        return diagITensor (elts, inds);
+    }
+    else
+    {
+        vector<Cplx> elts;
+        auto get_elt = [&elts] (Cplx r)
+        {
+            elts.push_back (r);
+        };
+        T.visit (get_elt);
+        return diagITensor (elts, inds);
+    }
+}
+
+ITensor hard_copy (const ITensor& T)
+{
+    auto re = ITensor (T.inds());
+    for(int i1 = 1; i1 <= T.inds()(1).dim(); i1++)
+    {
+        if (order(T) == 1)
+        {
+            if (isReal (T))
+                re.set (i1, elt(T,i1));
+            else
+                re.set (i1, eltC(T,i1));
+        }
+        else
+        {
+            for(int i2 = 1; i2 <= T.inds()(2).dim(); i2++)
+            {
+                if (order(T) == 2)
+                {
+                    if (isReal (T))
+                        re.set (i1, i2, elt(T,i1,i2));
+                    else
+                        re.set (i1, i2, eltC(T,i1,i2));
+                }
+                else
+                {
+                    for(int i3 = 1; i3 <= T.inds()(3).dim(); i3++)
+                    {
+                        if (order(T) == 3)
+                        {
+                            if (isReal (T))
+                                re.set (i1, i2, i3, elt(T,i1,i2,i3));
+                            else
+                                re.set (i1, i2, i3, eltC(T,i1,i2,i3));
+                        }
+                        else
+                        {
+                            cout << "Order not implemented: " << order(T) << endl;
+                            throw;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return re;
+}
+
+template <typename ValType=Real>
+inline ITensor Identity (const Index& ii, ValType val=1.)
+{
+    ITensor id (dag(ii), prime(ii));
+    if constexpr (is_same_v <ValType, Cplx>)
+    {
+        if (abs(val.imag()) < 1e-15)
+        {
+            for(int i = 1; i <= ii.dim(); i++)
+                id.set (i,i,val.real());
+        }
+        else
+        {
+            for(int i = 1; i <= ii.dim(); i++)
+                id.set (i,i,val);
+        }
+    }
+    else
+    {
+        for(int i = 1; i <= ii.dim(); i++)
+            id.set (i,i,val);
+    }
+    return id;
+}
+
+template <typename ValType=Real>
+inline ITensor Identity (const Index& i1, const Index& i2, ValType val=1.)
+{
+    ITensor id (i1, i2);
+    for(int i = 1; i <= i1.dim(); i++)
+        id.set (i,i,val);
+    return id;
+}
+
+template <typename ValType=Real>
+inline ITensor Identity (const IndexSet& iis, ValType val=1.)
+{
+    return Identity (iis(1), iis(2), val);
+}
+
+// If the index <ii> has quantum number Nf (number of fermions) or Pf (parity),
+// return the parities of each position in <ii>.
+// Otherwise, return a vector of all elements 1
+// <i0> set the starting index of returned vector
+vector<int> get_fermion_parity (const Index& ii, int i0=1)
+{
+    vector<int> ps (i0);
+    if (nblock(ii) == 0)
+        return vector<int> (ii.dim()+i0, 1);
+
+    for(int i = 1; i <= nblock(ii); i++)
+    // For each QN block
+    {
+        Real p = 1;
+        if (qn(ii,i).hasName("Nf"))
+            p = (qn(ii,i).val("Nf") % 2 == 1 ? -1 : 1);
+        else if (qn(ii,i).hasName("Pf"))
+            p = (qn(ii,i).val("Pf") % 2 == 1 ? -1 : 1);
+
+        for(int j = 1; j <= blocksize (ii, i); j++)
+        // For each element in the block
+        {
+            ps.push_back (p);
+        }
+    }
+    return ps;
+}
+
+// For fermionic tensors
+inline ITensor parity_sign_tensor (const Index& ii)
+{
+    Index iip = prime(dag(ii));
+    auto pfs = get_fermion_parity (ii, 0);
+    auto re = ITensor (ii, iip);
+    for(int i = 1; i <= ii.dim(); i++)
+        re.set (i, i, pfs.at(i-1));
+    return re;
+/*
+    int block_ipre = 0;
+    for(int i = 1; i <= nblock(ii); i++)
+    // For each QN block
+    {
+        Real a = 1.;
+        if (qn(ii,i).hasName("Nf"))
+            a = (qn(ii,i).val("Nf") % 2 == 1 ? -1. : 1.);
+        else if (qn(ii,i).hasName("Pf"))
+            a = (qn(ii,i).val("Pf") % 2 == 1 ? -1. : 1.);
+
+        int bsize = blocksize (ii, i);
+        for(int j = 1; j <= bsize; j++)
+        // For each element in the block
+        {
+            int k = j + block_ipre;
+            s.set (ii=k, iip=k, a);
+        }
+        block_ipre += bsize;
+    }
+    return dag(s);*/
+}
+
+ITensor SwapGate (const Index& i1, const Index& i2)
+{
+  Index i1_pr = prime(dag(i1)),
+        i2_pr = prime(dag(i2));
+
+  vector<int> pf1 = get_fermion_parity (i1),
+              pf2 = get_fermion_parity (i2);
+
+  ITensor swp (i1, i2, i1_pr, i2_pr);
+  for(int i = 1; i <= i1.dim(); ++i)
+      for(int j = 1; j <= i2.dim(); ++j)
+      {
+          if (pf1.at(i) == 1 && pf2.at(j) == 1)
+              swp.set (i1=i, i2=j, i1_pr=j, i2_pr=i, -1.);
+          else
+              swp.set (i1=i, i2=j, i1_pr=j, i2_pr=i, 1.);
+      }
+  return swp;
+}
+
+Sweeps Read_sweeps (const string& fname)
+{
+    vector<int> m, niter;
+    vector<Real> cutoff, noise;
+
+    ifstream ifs (fname);
+    vector<string> lines = read_bracket (ifs, "sweeps", 0);
+
+    auto keys = split_str<string> (lines.at(0));
+    unordered_map <string, int> ii;
+    for(int i = 0; i < keys.size(); i++)
+        ii[keys.at(i)] = i;
+
+    int nsweeps = 0;
+    for(size_t i = 1; i < lines.size(); i++)
+    {
+        auto tmp = split_str<Real> (lines.at(i));
+        int n = tmp.at(ii.at("nsweep"));
+        nsweeps += n;
+    }
+
+    Sweeps sweeps (nsweeps);
+    int isw = 1;
+    for(size_t i = 1; i < lines.size(); i++)
+    {
+        auto tmp = split_str<Real> (lines.at(i));
+        int nsweep = tmp.at(ii.at("nsweep"));
+        for(int j = 0; j < nsweep; j++)
+        {
+            if (ii.count("minm") != 0)
+                sweeps.setmindim (isw, tmp.at(ii.at("minm")));
+            sweeps.setmaxdim (isw, tmp.at(ii.at("maxm")));
+            sweeps.setcutoff (isw, tmp.at(ii.at("cutoff")));
+            sweeps.setniter  (isw, tmp.at(ii.at("niter")));
+            sweeps.setnoise  (isw, tmp.at(ii.at("noise")));
+            isw++;
+        }
+    }
+    return sweeps;
+}
+
+bool check_ortho (const ITensor& T, const Index& l, int pr=10, Real crit=1e-8)
+// <l> is the open link
+{
+    auto Tdag = dag (prime (T, pr, l));
+    auto IT = T * Tdag;
+    assert (order(IT) == 2);
+    assert (id(IT.inds()(1)) == id(IT.inds()(2)));
+
+    auto I = Identity (IT.inds());
+    auto d = norm(I - IT);
+    if (d > crit)
+    {
+        cout << __FUNCTION__ << ": error = " << d << endl;
+        return false;
+    }
+    return true;
+}
 
 // Contract <ten1> and <ten2> by the tags in <tags1> and <tags2>
 void auto_contractEqual_by_tag (ITensor& ten1, const ITensor& ten2, const vector<string>& tags1, const vector<string>& tags2)
@@ -49,22 +337,6 @@ inline ITensor auto_add_by_tag (ITensor ten1, const ITensor& ten2, const vector<
     return ten1;
 }
 
-inline ITensor Identity (const Index& ii)
-{
-    ITensor id (dag(ii), prime(ii));
-    for(int i = 1; i <= ii.dim(); i++)
-        id.set (i,i,1.);
-    return id;
-}
-
-inline ITensor Identity (const Index& ii, const Index& iip)
-{
-    ITensor id (ii, iip);
-    for(int i = 1; i <= ii.dim(); i++)
-        id.set (i,i,1.);
-    return id;
-}
-
 inline int dim (const ITensor& T)
 {
     int d = 1;
@@ -96,35 +368,6 @@ vector<ITensor> get_LEs (const MPS& mps)
     }
     return Ls;
 }
-
-// For fermionic tensors
-ITensor parity_sign_tensor (const Index& ii)
-{
-    Index iip = prime(dag(ii));
-    ITensor s (ii, iip);
-
-    int block_ipre = 0;
-    for(int i = 1; i <= nblock(ii); i++)
-    // For each QN block
-    {
-        Real a = 1.;
-        if (qn(ii,i).hasName("Nf"))
-            a = (qn(ii,i).val("Nf") % 2 == 1 ? -1. : 1.);
-        else if (qn(ii,i).hasName("Pf"))
-            a = (qn(ii,i).val("Pf") % 2 == 1 ? -1. : 1.);
-
-        int bsize = blocksize (ii, i);
-        for(int j = 1; j <= bsize; j++)
-        // For each element in the block
-        {
-            int k = j + block_ipre;
-            s.set (ii=k, iip=k, a);
-        }
-        block_ipre += bsize;
-    }
-    return dag(s);
-}
-
 
 // ==========
 // Contract the transfer matrix
