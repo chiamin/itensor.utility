@@ -76,7 +76,7 @@ ifstream open_file (const string& file)
         cout << "Cannot open " << file << endl;
         throw;
     }
-    return move(ifs);
+    return ifs;
 }
 
 template <typename T>
