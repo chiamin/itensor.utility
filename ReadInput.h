@@ -195,4 +195,58 @@ vector<string> read_bracket (string file, string key, int skipline=0)
     }
     return read_bracket (ifs, key, skipline);
 }
+
+template <typename Type1, typename Type2>
+vector <tuple<Type1, Type2>> read_bracket_values (string file, string key, int skipline=0)
+{
+    auto lines = read_bracket (file, key, skipline);
+    vector<tuple<Type1, Type2>> re;
+    for(auto& line : lines)
+    {
+        rstrip (line);
+        std::istringstream iss (line);
+        Type1 val1;
+        Type2 val2;
+        iss >> val1 >> val2;
+        re.emplace_back (val1, val2);
+    }
+    return re;
+}
+
+template <typename Type1, typename Type2, typename Type3>
+vector <tuple<Type1, Type2, Type3>> read_bracket_values (string file, string key, int skipline=0)
+{
+    auto lines = read_bracket (file, key, skipline);
+    vector<tuple<Type1, Type2, Type3>> re;
+    for(auto& line : lines)
+    {
+        rstrip (line);
+        std::istringstream iss (line);
+        Type1 val1;
+        Type2 val2;
+        Type3 val3;
+        iss >> val1 >> val2 >> val3;
+        re.emplace_back (val1, val2, val3);
+    }
+    return re;
+}
+
+template <typename Type1, typename Type2, typename Type3, typename Type4>
+vector <tuple<Type1, Type2, Type3, Type4>> read_bracket_values (string file, string key, int skipline=0)
+{
+    auto lines = read_bracket (file, key, skipline);
+    vector<tuple<Type1, Type2, Type3, Type4>> re;
+    for(auto& line : lines)
+    {
+        rstrip (line);
+        std::istringstream iss (line);
+        Type1 val1;
+        Type2 val2;
+        Type3 val3;
+        Type4 val4;
+        iss >> val1 >> val2 >> val3 >> val4;
+        re.emplace_back (val1, val2, val3, val4);
+    }
+    return re;
+}
 #endif
