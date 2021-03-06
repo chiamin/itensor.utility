@@ -10,15 +10,15 @@ using namespace itensor;
 // For ITensor3
 
 // Use iprint
+#ifndef iprint
 #define iprint(name) myprinter(#name, (name))
-template <typename TType>
-void myprinter (string name, const TType& value)
+#endif
+void myprinter (string name, const ITensor& T)
 {
     cout << name << endl;
-    if constexpr (is_same_v <TType, ITensor>)
-        if (value)
-            cout << "is real = " << isReal(value) << endl;
-    cout << value << endl;
+    if (T)
+        cout << "is real = " << isReal(T) << endl;
+    cout << T << endl;
 }
 
 inline Real toReal (const ITensor& T)
