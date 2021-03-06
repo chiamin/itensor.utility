@@ -16,7 +16,8 @@ void myprinter (string name, const TType& value)
 {
     cout << name << endl;
     if constexpr (is_same_v <TType, ITensor>)
-        cout << "is real = " << isReal(value) << endl;
+        if (value)
+            cout << "is real = " << isReal(value) << endl;
     cout << value << endl;
 }
 
