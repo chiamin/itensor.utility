@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include "itensor/all.h"
 #include "ReadInput.h"
+#include "GeneralUtility.h"
 using namespace std;
 using namespace itensor;
 

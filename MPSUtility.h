@@ -1,6 +1,8 @@
 #ifndef __MPSUTILITY_H_CMC__
 #define __MPSUTILITY_H_CMC__
 #include "itensor/mps/mpo.h"
+using namespace std;
+using namespace itensor;
 
 void print_MPO_tensors (const MPO& mpo, int i)
 {
@@ -11,11 +13,18 @@ void print_MPO_tensors (const MPO& mpo, int i)
         for(int i2 = 1; i2 <= ir.dim(); i2++)
         {
             auto Wij = mpo(i);
+            auto is = findIndex (Wij, "Site,0");
             if (il) Wij *= setElt(dag(il)=i1);
             if (ir) Wij *= setElt(dag(ir)=i2);
             if (norm(Wij) != 0.)
             {
-                cout << "icol, irow = " << i1 << " " << i2 << endl;
+                if (!il)
+                    cout << "iright = " << i2 << endl;
+                else if (!ir)
+                    cout << "ileft = " << i1 << endl;
+                else
+                    cout << "ileft, iright = " << i1 << " " << i2 << endl;
+                Wij.permute ({is, prime(is)});
                 PrintData(Wij);
             }
         }
