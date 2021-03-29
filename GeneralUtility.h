@@ -12,12 +12,13 @@ inline void myprinter (string name, const TType& value)
     cout << value << endl;
 }
 
+#define mycheck(condition, message) mycheck_impl(condition, __func__, message)
 template <typename TypeName>
-inline void mycheck (const TypeName& condition, string message="")
+inline void mycheck_impl (const TypeName& condition, const string& func_name, string message="")
 {
     if (!bool(condition))
     {
-        cout << message << endl;
+        cout << func_name << ": " << message << endl;
         throw;
     }
 }

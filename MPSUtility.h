@@ -4,6 +4,31 @@
 using namespace std;
 using namespace itensor;
 
+MPO Make_NMPO (const Fermion& sites)
+{
+    AutoMPO ampo (sites);
+    for(int i = 1; i <= length(sites); i++)
+    {
+        ampo += 1.0,"N",i;
+    }
+    return toMPO (ampo);
+}
+
+template <typename MPSType>
+void check_indices (const MPSType& psi)
+{
+    int N = length(psi);
+    for(int i = 1; i <= N; i++)
+    {
+        if (i != N)
+            mycheck (commonIndex (psi(i), psi(i+1)), "MPS/MPO link-index check failed");
+        auto is = findIndex (psi(i), "Site,0");
+        mycheck (is, "MPS/MPO site-index check failed");
+        if constexpr (is_same_v <MPSType,MPO>)
+            mycheck (prime(is), "MPS/MPO site-index check failed");
+    }
+}
+
 void print_MPO_tensors (const MPO& mpo, int i)
 {
     cout << "site " << i << endl;
@@ -82,5 +107,4 @@ void renewLinkInds (MPS& mps, int ibeg, int iend)
     auto il0 = leftLinkIndex (mps, iend);
     mps.ref(iend).replaceInds ({il0}, {dag(ir)});
 }
-
 #endif

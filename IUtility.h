@@ -218,10 +218,12 @@ inline ITensor parity_sign_tensor (const Index& ii)
     return dag(s);*/
 }
 
-ITensor SwapGate (const Index& i1, const Index& i2)
+ITensor SwapGate (const Index& i1_, const Index& i2_)
 {
-  Index i1_pr = prime(dag(i1)),
-        i2_pr = prime(dag(i2));
+  Index i1 = dag(i1_),
+        i2 = dag(i2_);
+  Index i1_pr = prime(i1_),
+        i2_pr = prime(i2_);
 
   vector<int> pf1 = get_fermion_parity (i1),
               pf2 = get_fermion_parity (i2);
@@ -238,13 +240,13 @@ ITensor SwapGate (const Index& i1, const Index& i2)
   return swp;
 }
 
-Sweeps Read_sweeps (const string& fname)
+Sweeps Read_sweeps (const string& fname, string key="sweeps")
 {
     vector<int> m, niter;
     vector<Real> cutoff, noise;
 
     ifstream ifs (fname);
-    vector<string> lines = read_bracket (ifs, "sweeps", 0);
+    vector<string> lines = read_bracket (ifs, key, 0);
 
     auto keys = split_str<string> (lines.at(0));
     unordered_map <string, int> ii;
@@ -425,6 +427,20 @@ inline void apply_onsite_ops (ITensor& A, const SiteSet& sites, int i, const vec
     ITensor op_all = merge_onsite_operators (sites, i, ops);
     A *= op_all;
     A.mapPrime(1,0);
+}
+
+// Apply <gate> on sites (<i>,<i>+1) on <psi>.
+// <dir> = Fromleft:  the orthogonality center of the resulting MPS is on <i>+1, or
+//         Fromright: the orthogonality center of the resulting MPS is on <i>
+// The truncation settings in <args>: MaxDim, Cutoff
+inline Spectrum apply_gate (MPS& psi, int i, const ITensor& gate, Direction dir, const Args& args=Args::global())
+{
+    int oc = orthoCenter(psi);
+    assert (oc == i || oc == i+1);
+    auto AA = psi(i) * psi(i+1) * gate;
+    AA.noPrime("Site");
+    auto spec = psi.svdBond (i, AA, dir, args);
+    return spec;
 }
 
 inline void apply_fermionic_sign (ITensor& A, const Index& iL)
