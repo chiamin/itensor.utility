@@ -31,7 +31,7 @@ void check_indices (const MPSType& psi)
 
 void print_MPO_tensors (const MPO& mpo, int i)
 {
-    cout << "site " << i << endl;
+    cout << "site " << i << endl << endl;
     auto il = leftLinkIndex (mpo, i);
     auto ir = rightLinkIndex (mpo, i);
     for(int i1 = 1; i1 <= il.dim(); i1++)
@@ -53,6 +53,16 @@ void print_MPO_tensors (const MPO& mpo, int i)
                 PrintData(Wij);
             }
         }
+}
+
+void print_MPO (const MPO& mpo)
+{
+    for(int i = 1; i <= length(mpo); i++)
+    {
+        cout << "------------------------" << endl;
+        print_MPO_tensors (mpo, i);
+        cout << "------------------------" << endl;
+    }
 }
 
 template <typename MPSTYPE>

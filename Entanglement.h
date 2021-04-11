@@ -6,8 +6,7 @@ Real EntangEntropy (const Spectrum& spec)
     Real S = 0.;
     for(int i = 1; i <= spec.size(); i++)
     {
-        auto si = spec.eig(i);
-        auto p = si * si;
+        auto p = spec.eig(i);
         S += - p * log(p);
     }
     return S;

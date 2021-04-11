@@ -8,8 +8,6 @@
 using namespace std;
 using namespace itensor;
 
-// For ITensor3
-
 // Use iprint
 #ifndef iprint
 #define iprint(name) myprinter(#name, (name))
@@ -22,6 +20,8 @@ void myprinter (string name, const ITensor& T)
     cout << T << endl;
 }
 
+namespace myutility
+{
 inline Real toReal (const ITensor& T)
 {
     if (!isReal(T))
@@ -479,5 +479,5 @@ void contract_transfer_matrix (ITensor& re, const SiteSet& sites, const MPS& mps
     re *= A;
     re *= Ap;
 }
-
+}
 #endif
