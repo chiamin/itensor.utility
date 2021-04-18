@@ -1,7 +1,9 @@
+#ifndef __STRINGUTILITY_H_CMC__
+#define __STRINGUTILITY_H_CMC__
 #include <string>
 using namespace std;
 
-inline bool inStr (string str, string key)
+inline bool hasStr (string str, string key)
 {
     size_t pos = str.find (key);
     return !(pos == std::string::npos);
@@ -31,3 +33,4 @@ inline vector<string> splitStr (string str, const string& delimiter)
     re.push_back (str);
     return re;
 }
+#endif

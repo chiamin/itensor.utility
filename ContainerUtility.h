@@ -15,6 +15,26 @@ ostream& operator<< (ostream& os, const vector<T>& v)
 }
 
 template <typename T>
+vector<vector<T>> split_vector (const vector<T>& v, int itv)
+{
+    vector<vector<T>> re;
+    int N = v.size() / itv;
+    if (v.size() % 2 != 0)
+        N++;
+    re.reserve (N);
+    for(int i = 0; i < v.size(); i += itv)
+    {
+        int i2 = i + itv;
+        if (i2 > v.size())
+            i2 = v.size();
+        auto it1 = v.begin() + i;
+        auto it2 = v.begin() + i2;
+        re.emplace_back (it1, it2);
+    }
+    return re;
+}
+
+template <typename T>
 inline void remove_element (vector<T>& v, const T& key)
 {
     v.erase (std::remove (v.begin(), v.end(), key), v.end());

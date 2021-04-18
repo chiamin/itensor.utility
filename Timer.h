@@ -29,7 +29,7 @@ class Timer
         // Record the time.
         // One can keep calling more than one rec() after a start(),
         // or making new starting point by calling start().
-        void    rec     ()          { _t2 = clock(); }
+        void    stop    ()          { _t2 = clock(); }
         // Return the total time duration between each starts and records (in seconds).
         double  t       () const    { return double(_t2 - _t1) / CLOCKS_PER_SEC; }
         void    reset   ()          { _t1 = _t2 = 0.; start(); }
@@ -80,7 +80,7 @@ bool Timers :: print (bool force_print)
 {
   if (_timers.size() == 0) return false;
 
-  _main.rec();
+  _main.stop();
   double t_main = _main.t();
 
   if (t_main - _last_print_time > _dt || force_print) {

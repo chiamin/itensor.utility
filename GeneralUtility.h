@@ -23,4 +23,13 @@ inline void mycheck_impl (const TypeName& condition, const string& func_name, st
     }
 }
 
+template <typename NumType>
+inline NumType conjT (NumType a)
+{
+    if (is_same_v <NumType, double>)
+        return a;
+    else
+        return conj(a);
+}
+
 #endif

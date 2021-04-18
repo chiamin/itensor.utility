@@ -20,8 +20,17 @@ void myprinter (string name, const ITensor& T)
     cout << T << endl;
 }
 
-namespace myutility
+namespace iutility
 {
+template <typename NumType, typename... Args>
+inline NumType eltT (const ITensor& T, Args... args)
+{
+    if constexpr (is_same_v <NumType, Real>)
+        return elt (T, args...);
+    else
+        return eltC (T, args...);
+}
+
 inline Real toReal (const ITensor& T)
 {
     if (!isReal(T))
