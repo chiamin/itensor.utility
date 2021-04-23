@@ -7,39 +7,47 @@
 struct GateBase
 {
     public:
-        GateBase (const ITensor& gate, const Index& ii)
+        GateBase (const ITensor& gate, Index ii)
         : _gate (gate)
-        , _inds ({ii, prime(ii)})
         , _size (1)
-        {}
-        GateBase (const ITensor& gate, const Index& i1, const Index& i2)
+        {
+            ii = sim(ii);
+            _inds = {ii, prime(ii)};
+        }
+        GateBase (const ITensor& gate, Index i1, Index i2)
         : _gate (gate)
-        , _inds ({i1, i2, prime(i1), prime(i2)})
         , _size (2)
-        {}
+        {
+            i1 = sim(i1);
+            i2 = sim(i2);
+            _inds = {i1, i2, prime(i1), prime(i2)};
+        }
         template <typename GenerateFunction, typename... FuncArgs>
-        GateBase (GenerateFunction GateGen, const Index& i1, FuncArgs... args)
-        : _gate (GateGen(i1,args...))
-        , _inds ({i1, prime(i1)})
-        , _size (1)
-        {}
+        GateBase (GenerateFunction GateGen, Index i1, FuncArgs... args)
+        : _size (1)
+        {
+            i1 = sim(i1);
+            _gate = GateGen (i1, args...);
+            _inds = {i1, prime(i1)};
+        }
         template <typename GenerateFunction, typename... FuncArgs>
-        GateBase (GenerateFunction GateGen, const Index& i1, const Index& i2, FuncArgs... args)
-        : _gate (GateGen(i1,i2,args...))
-        , _inds ({i1, i2, prime(i1), prime(i2)})
-        , _size (2)
-        {}
+        GateBase (GenerateFunction GateGen, Index i1, Index i2, FuncArgs... args)
+        : _size (2)
+        {
+            i1 = sim(i1);
+            i2 = sim(i2);
+            _gate = GateGen (i1, i2, args...);
+            _inds = {i1, i2, prime(i1), prime(i2)};
+        }
 
         template <typename IndsType>
         ITensor gen (const IndsType& inds) const
         {
-            if (_inds == inds)
-                return _gate;
-            else
-                return replaceInds (_gate, _inds, inds);
+            return replaceInds (_gate, _inds, inds);
         }
 
         int size () const { return _size; }
+        auto const& gate () const { return _gate; }
 
     private:
         ITensor _gate;
@@ -70,6 +78,15 @@ class GateContainer
         {
             _gates.emplace (name, GateBase(GateGen, args...));
         }
+        template <int n, typename GenerateFunction>
+        void new_gate (const string& name, const SiteSet& sites, GenerateFunction GateGen)
+        {
+            if constexpr (n == 1)
+                _gates.emplace (name, GateBase(GateGen, sites(1)));
+            else if (n == 2)
+                _gates.emplace (name, GateBase(GateGen, sites(1), sites(2)));
+            else throw;
+        }
 
         void add (const string& name, int pos, bool move_oc=true)
         {
@@ -78,7 +95,7 @@ class GateContainer
         }
         void add_front (const string& name, int pos, bool move_oc=true)
         {
-            ApplyGateInfo inf   o {name, pos, move_oc};
+            ApplyGateInfo info {name, pos, move_oc};
             _info.insert (_info.begin(), info);
         }
 
@@ -87,6 +104,8 @@ class GateContainer
         tuple<int,int> apply (MPSType& psi, const Args& args=Args::global(),
                               int leftEdge=std::numeric_limits<int>::min(),
                               int rightEdge=std::numeric_limits<int>::max());
+
+        ITensor operator() (const string& name) const { return _gates.at(name).gate(); }
 
     private:
         unordered_map <string,GateBase> _gates;
@@ -98,6 +117,7 @@ tuple<int,int>
 GateContainer :: apply
 (MPSType& psi, const Args& args, int leftEdge, int rightEdge)
 {
+    // Get physical indices
     auto iss = IndexSet();
     if constexpr (is_same_v<MPSType,MPS>)
         iss = siteInds (psi);
@@ -112,6 +132,8 @@ GateContainer :: apply
         }
         iss = IndexSet (ii);
     }
+
+    // Apply gates
     for(int j = 0; j < _info.size(); j++)
     {
         auto info = _info.at(j);
@@ -148,6 +170,7 @@ GateContainer :: apply
             // Generate gate
             vector<Index> inds {iss(i), iss(i+1), prime(iss(i)), prime(iss(i+1))};
             ITensor gate = gatebase.gen (inds);
+
             // Move orthogonality center
             int oc = orthoCenter (psi);
             if (info.move_oc && i != oc && i+1 != oc)

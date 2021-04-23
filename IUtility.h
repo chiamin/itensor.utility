@@ -170,21 +170,23 @@ inline ITensor Identity (const IndexSet& iis, ValType val=1.)
 // If the index <ii> has quantum number Nf (number of fermions) or Pf (parity),
 // return the parities of each position in <ii>.
 // Otherwise, return a vector of all elements 1
-// <i0> set the starting index of returned vector
-vector<int> get_fermion_parity (const Index& ii, int i0=1)
+vector<bool> get_fermion_parity (const Index& ii)
 {
-    vector<int> ps (i0);
+    vector<bool> ps (1);
     if (nblock(ii) == 0)
-        return vector<int> (ii.dim()+i0, 1);
+    {
+        ps.resize (ii.dim()+1, 1);
+        return ps;
+    }
 
     for(int i = 1; i <= nblock(ii); i++)
     // For each QN block
     {
         Real p = 1;
         if (qn(ii,i).hasName("Nf"))
-            p = (qn(ii,i).val("Nf") % 2 == 1 ? -1 : 1);
+            p = (qn(ii,i).val("Nf") % 2);
         else if (qn(ii,i).hasName("Pf"))
-            p = (qn(ii,i).val("Pf") % 2 == 1 ? -1 : 1);
+            p = (qn(ii,i).val("Pf") % 2);
 
         for(int j = 1; j <= blocksize (ii, i); j++)
         // For each element in the block
@@ -199,10 +201,13 @@ vector<int> get_fermion_parity (const Index& ii, int i0=1)
 inline ITensor parity_sign_tensor (const Index& ii)
 {
     Index iip = prime(dag(ii));
-    auto pfs = get_fermion_parity (ii, 0);
+    auto pfs = get_fermion_parity (ii);
     auto re = ITensor (ii, iip);
     for(int i = 1; i <= ii.dim(); i++)
-        re.set (i, i, pfs.at(i-1));
+    {
+        int sign = (pfs.at(i) ? -1 : 1);
+        re.set (i, i, sign);
+    }
     return re;
 /*
     int block_ipre = 0;
@@ -234,14 +239,14 @@ ITensor SwapGate (const Index& i1_, const Index& i2_)
   Index i1_pr = prime(i1_),
         i2_pr = prime(i2_);
 
-  vector<int> pf1 = get_fermion_parity (i1),
-              pf2 = get_fermion_parity (i2);
+  vector<bool> pf1 = get_fermion_parity (i1),
+               pf2 = get_fermion_parity (i2);
 
   ITensor swp (i1, i2, i1_pr, i2_pr);
   for(int i = 1; i <= i1.dim(); ++i)
       for(int j = 1; j <= i2.dim(); ++j)
       {
-          if (pf1.at(i) == 1 && pf2.at(j) == 1)
+          if (pf1.at(i) && pf2.at(j))
               swp.set (i1=i, i2=j, i1_pr=j, i2_pr=i, -1.);
           else
               swp.set (i1=i, i2=j, i1_pr=j, i2_pr=i, 1.);
@@ -249,7 +254,7 @@ ITensor SwapGate (const Index& i1_, const Index& i2_)
   return swp;
 }
 
-Sweeps Read_sweeps (const string& fname, string key="sweeps")
+Sweeps Read_sweeps (const string& fname, string key="sweeps", int nlines=std::numeric_limits<int>::max())
 {
     vector<int> m, niter;
     vector<Real> cutoff, noise;
@@ -272,7 +277,9 @@ Sweeps Read_sweeps (const string& fname, string key="sweeps")
 
     Sweeps sweeps (nsweeps);
     int isw = 1;
-    for(size_t i = 1; i < lines.size(); i++)
+    if (nlines >= lines.size())
+        nlines = lines.size() - 1;
+    for(size_t i = 1; i <= nlines; i++)
     {
         auto tmp = split_str<Real> (lines.at(i));
         int nsweep = tmp.at(ii.at("nsweep"));
@@ -436,20 +443,6 @@ inline void apply_onsite_ops (ITensor& A, const SiteSet& sites, int i, const vec
     ITensor op_all = merge_onsite_operators (sites, i, ops);
     A *= op_all;
     A.mapPrime(1,0);
-}
-
-// Apply <gate> on sites (<i>,<i>+1) on <psi>.
-// <dir> = Fromleft:  the orthogonality center of the resulting MPS is on <i>+1, or
-//         Fromright: the orthogonality center of the resulting MPS is on <i>
-// The truncation settings in <args>: MaxDim, Cutoff
-inline Spectrum apply_gate (MPS& psi, int i, const ITensor& gate, Direction dir, const Args& args=Args::global())
-{
-    int oc = orthoCenter(psi);
-    assert (oc == i || oc == i+1);
-    auto AA = psi(i) * psi(i+1) * gate;
-    AA.noPrime("Site");
-    auto spec = psi.svdBond (i, AA, dir, args);
-    return spec;
 }
 
 inline void apply_fermionic_sign (ITensor& A, const Index& iL)

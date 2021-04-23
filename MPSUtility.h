@@ -4,6 +4,20 @@
 using namespace std;
 using namespace itensor;
 
+// Apply <gate> on sites (<i>,<i>+1) on <psi>.
+// <dir> = Fromleft:  the orthogonality center of the resulting MPS is on <i>+1, or
+//         Fromright: the orthogonality center of the resulting MPS is on <i>
+// The truncation settings in <args>: MaxDim, Cutoff
+Spectrum apply_gate (MPS& psi, int i, const ITensor& gate, Direction dir, const Args& args=Args::global())
+{
+    int oc = orthoCenter(psi);
+    assert (oc == i || oc == i+1);
+    auto AA = psi(i) * psi(i+1) * gate;
+    AA.noPrime();
+    auto spec = psi.svdBond (i, AA, dir, args);
+    return spec;
+}
+
 MPO Make_NMPO (const Fermion& sites)
 {
     AutoMPO ampo (sites);
