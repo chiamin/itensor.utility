@@ -7,20 +7,26 @@
 struct GateBase
 {
     public:
-        GateBase (const ITensor& gate, Index ii)
+        GateBase (const ITensor& gate, Index i1)
         : _gate (gate)
         , _size (1)
         {
-            ii = sim(ii);
+            auto old_inds = {i1, prime(i1)};
+            mycheck (hasInds (gate, old_inds), "indices not match");
+            auto ii = sim(i1);
             _inds = {ii, prime(ii)};
+            _gate.replaceInds (old_inds, _inds);
         }
         GateBase (const ITensor& gate, Index i1, Index i2)
         : _gate (gate)
         , _size (2)
         {
-            i1 = sim(i1);
-            i2 = sim(i2);
-            _inds = {i1, i2, prime(i1), prime(i2)};
+            auto old_inds = {i1, prime(i1), i2, prime(i2)};
+            mycheck (hasInds (gate, old_inds), "indices not match");
+            auto ii1 = sim(i1);
+            auto ii2 = sim(i2);
+            _inds = {ii1, ii2, prime(ii1), prime(ii2)};
+            _gate.replaceInds (old_inds, _inds);
         }
         template <typename GenerateFunction, typename... FuncArgs>
         GateBase (GenerateFunction GateGen, Index i1, FuncArgs... args)

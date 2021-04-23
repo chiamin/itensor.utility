@@ -167,6 +167,11 @@ inline ITensor Identity (const IndexSet& iis, ValType val=1.)
     return Identity (iis(1), iis(2), val);
 }
 
+inline bool has_qn (const Index& ii)
+{
+    return !(nblock(ii) == 0);
+}
+
 // If the index <ii> has quantum number Nf (number of fermions) or Pf (parity),
 // return the parities of each position in <ii>.
 // Otherwise, return a vector of all elements 1
@@ -175,8 +180,10 @@ vector<bool> get_fermion_parity (const Index& ii)
     vector<bool> ps (1);
     if (nblock(ii) == 0)
     {
-        ps.resize (ii.dim()+1, 1);
-        return ps;
+//        ps.resize (ii.dim()+1, 1);
+//        return ps;
+        cout << "Index has no quantum number" << endl;
+        throw;
     }
 
     for(int i = 1; i <= nblock(ii); i++)
@@ -187,6 +194,11 @@ vector<bool> get_fermion_parity (const Index& ii)
             p = (qn(ii,i).val("Nf") % 2);
         else if (qn(ii,i).hasName("Pf"))
             p = (qn(ii,i).val("Pf") % 2);
+        else
+        {
+            cout << "No Nf or Pf quantum number" << endl;
+            throw;
+        }
 
         for(int j = 1; j <= blocksize (ii, i); j++)
         // For each element in the block
