@@ -21,7 +21,7 @@ struct GateBase
         : _gate (gate)
         , _size (2)
         {
-            auto old_inds = {i1, prime(i1), i2, prime(i2)};
+            auto old_inds = {i1, i2, prime(i1), prime(i2)};
             mycheck (hasInds (gate, old_inds), "indices not match");
             auto ii1 = sim(i1);
             auto ii2 = sim(i2);
@@ -46,9 +46,16 @@ struct GateBase
             _inds = {i1, i2, prime(i1), prime(i2)};
         }
 
-        template <typename IndsType>
-        ITensor gen (const IndsType& inds) const
+        ITensor gen (const Index& ii) const
         {
+            return replaceInds (_gate, _inds, {ii,prime(ii)});
+        }
+        template <typename IndsType>
+        ITensor gen (const IndsType& inds_) const
+        {
+            auto inds = inds_;
+            for(const auto& ii : inds_)
+                inds.push_back (prime(ii));
             return replaceInds (_gate, _inds, inds);
         }
 
@@ -150,8 +157,7 @@ GateContainer :: apply
         {
             if (i < leftEdge || i > rightEdge) continue;
             // Generate gate
-            vector<Index> inds {iss(i), prime(iss(i))};
-            ITensor gate = gatebase.gen (inds);
+            ITensor gate = gatebase.gen (iss(i));
             // Apply gate
             int oc = orthoCenter (psi);
             if constexpr (is_same_v <MPSType, MPS>)
@@ -174,7 +180,7 @@ GateContainer :: apply
             //if (i == rightEdge) rightEdge--;
             if (i < leftEdge || i > rightEdge) continue;
             // Generate gate
-            vector<Index> inds {iss(i), iss(i+1), prime(iss(i)), prime(iss(i+1))};
+            vector<Index> inds = {iss(i), iss(i+1)};
             ITensor gate = gatebase.gen (inds);
 
             // Move orthogonality center
