@@ -23,13 +23,15 @@ inline void mycheck_impl (const TypeName& condition, const string& func_name, st
     }
 }
 
+namespace iutility {
+
 template <typename NumType>
 inline NumType conjT (NumType a)
 {
-    if (is_same_v <NumType, double>)
+    if constexpr (is_same_v <NumType, double>)
         return a;
     else
-        return conj(a);
+        return std::conj(a);
 }
-
+}
 #endif

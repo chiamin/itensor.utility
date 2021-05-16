@@ -1,5 +1,6 @@
 #ifndef __MPSUTILITY_H_CMC__
 #define __MPSUTILITY_H_CMC__
+#include <iomanip>
 #include "itensor/mps/mpo.h"
 using namespace std;
 using namespace itensor;
@@ -64,7 +65,18 @@ void print_MPO_tensors (const MPO& mpo, int i)
                 else
                     cout << "ileft, iright = " << i1 << " " << i2 << endl;
                 Wij.permute ({is, prime(is)});
-                PrintData(Wij);
+                //PrintData(Wij);
+
+                // Print in matrix form
+                cout << setprecision(4);
+                cout << endl;
+                for(int j1 = 1; j1 <= dim(is); j1++)
+                {
+                    for(int j2 = 1; j2 <= dim(is); j2++)
+                        cout << setw(10) << elt (Wij, j2, j1);
+                    cout << endl;
+                }
+                cout << endl;
             }
         }
 }
