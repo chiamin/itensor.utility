@@ -25,13 +25,15 @@ inline void mycheck_impl (const TypeName& condition, const string& func_name, st
 
 namespace iutility {
 
-template <typename NumType>
-inline NumType conjT (NumType a)
+inline complex<double> conjT (complex<double> a)
 {
-    if constexpr (is_same_v <NumType, double>)
-        return a;
-    else
-        return std::conj(a);
+    return std::conj(a);
 }
+
+inline double conjT (double a)
+{
+    return a;
+}
+
 }
 #endif
