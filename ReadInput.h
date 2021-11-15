@@ -113,11 +113,11 @@ vector<T> read_vector (ifstream& ifs, const string& key, int skip=2)
 
     // Read data
     vector<T> re = split_str<T> (line, skip);
-    if (re.size() == 0) {
-        cout << "ReadInput.h: read_vector: " << key << " not found" << endl;
-        cout << "             " << line << endl;
-        throw;
-    }
+    //if (re.size() == 0) {
+    //    cout << "ReadInput.h: read_vector: " << key << " not found" << endl;
+    //    cout << "             " << line << endl;
+    //    throw;
+    //}
     return re;
 }
 

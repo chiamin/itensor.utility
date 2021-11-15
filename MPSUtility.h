@@ -143,4 +143,27 @@ void renewLinkInds (MPS& mps, int ibeg, int iend)
     auto il0 = leftLinkIndex (mps, iend);
     mps.ref(iend).replaceInds ({il0}, {dag(ir)});
 }
+
+void MPSReplaceTensors (MPS& psi, const MPS& subpsi, int ibeg)
+{
+    for(int i = 1; i <= length(subpsi); i++)
+    {
+        int i0 = i+ibeg-1;
+        auto iis = findIndex (psi(i0), "Site");
+        auto iis2 = findIndex (subpsi(i), "Site");
+        Index iil;
+        if (i == 1)
+            iil = leftLinkIndex (psi, i0);
+        else if (i == length(subpsi))
+            iil = rightLinkIndex (psi, i0);
+        auto A = subpsi(i);
+        A.replaceInds ({iis2}, {iis});
+        psi.ref(i0) = A;
+        if (iil)
+        {
+            mycheck (dim(iil) == 1, "not dummy index");
+            psi.ref(i0) *= setElt(iil=1);
+        }
+    }
+}
 #endif
