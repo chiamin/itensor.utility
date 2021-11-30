@@ -36,4 +36,18 @@ inline double conjT (double a)
 }
 
 }
+
+namespace iut {
+
+inline complex<double> conj (complex<double> a)
+{
+    return std::conj(a);
+}
+
+inline double conj (double a)
+{
+    return a;
+}
+
+}
 #endif
