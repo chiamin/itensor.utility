@@ -2,8 +2,35 @@
 #define __MPSUTILITY_H_CMC__
 #include <iomanip>
 #include "itensor/mps/mpo.h"
+#include "GeneralUtility.h"
 using namespace std;
 using namespace itensor;
+
+IndexSet siteInds (const MPO& mpo)
+{
+    vector<Index> ss;
+    for(int i = 1; i <= length(mpo); i++)
+    {
+        auto s = siteIndex (mpo, i);
+        ss.push_back (s);
+    }
+    return IndexSet (ss);
+}
+
+bool operator== (const IndexSet& s1, const IndexSet& s2)
+{
+    if (length(s1) != length(s2))
+        return false;
+    for(int i = 1; i <= length(s1); i++)
+        if (s1(i) != s2(i))
+            return false;
+    return true;
+}
+
+inline bool operator!= (const IndexSet& s1, const IndexSet& s2)
+{
+    return !operator==(s1,s2);
+}
 
 // Apply <gate> on sites (<i>,<i>+1) on <psi>.
 // <dir> = Fromleft:  the orthogonality center of the resulting MPS is on <i>+1, or
