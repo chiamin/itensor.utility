@@ -4,8 +4,6 @@
 #include <iostream>
 using std::vector, std::ostream, std::tuple;
 
-namespace vectool {
-
 template <typename T>
 ostream& operator<< (ostream& os, const vector<T>& v)
 {
@@ -13,6 +11,8 @@ ostream& operator<< (ostream& os, const vector<T>& v)
         os << i << " ";
     return os;
 }
+
+namespace vectool {
 
 template <typename T>
 vector<vector<T>> split_vector (const vector<T>& v, int itv)
