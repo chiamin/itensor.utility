@@ -20,7 +20,7 @@ void myprinter (string name, const ITensor& T)
     cout << T << endl;
 }
 
-namespace iutility
+namespace iut
 {
 template <typename NumType, typename... Args>
 inline NumType eltT (const ITensor& T, Args... args)
