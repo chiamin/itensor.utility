@@ -461,7 +461,7 @@ inline void apply_fermionic_sign (ITensor& A, const Index& iL)
 {
     // Fermionic sign
     auto F = parity_sign_tensor (iL);
-    A *= F;
+    A *= dag(F);
     A.noPrime();
 }
 

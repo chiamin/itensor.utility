@@ -10,6 +10,45 @@
 #include "StringUtility.h"
 using namespace std;
 
+ifstream open_file (const string& file)
+{
+    ifstream ifs (file);
+    if (!ifs)
+    {
+        cout << "Cannot open " << file << endl;
+        throw;
+    }
+    return ifs;
+}
+
+int count_lines (const string& file)
+{
+    int number_of_lines = 0;
+    auto ifs = open_file (file);
+    std::string line;
+    while (std::getline (ifs, line))
+        ++number_of_lines;
+    ifs.close();
+    return number_of_lines;
+}
+
+template <typename T>
+vector<vector<T>> readtxt (const string& file, int skip=0)
+{
+    int N = count_lines (file);
+    vector<vector<T>> re;
+    re.reserve (N);
+
+    auto ifs = open_file (file);
+    string line;
+    while (getline(ifs, line))
+    {
+        re.push_back (split_str<T> (line));
+    }
+    ifs.close();
+    return re;
+}
+
 template<typename T>
 std::string type_name()
 {
@@ -21,17 +60,6 @@ std::string type_name()
         std::free(demangled_name);
     }   
     return tname;
-}
-
-ifstream open_file (const string& file)
-{
-    ifstream ifs (file);
-    if (!ifs)
-    {
-        cout << "Cannot open " << file << endl;
-        throw;
-    }
-    return ifs;
 }
 
 template <typename T>

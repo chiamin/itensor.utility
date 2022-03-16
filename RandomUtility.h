@@ -9,7 +9,7 @@ class RandGen
         using SeedType = unsigned long;
         using UnifReal = std::uniform_real_distribution<>;
 
-        RandGen (SeedType seed_=0, Real min=0., Real max=1.)
+        RandGen (SeedType seed_=0, double min=0., double max=1.)
         : gen (rd())
         , dis (std::make_unique<UnifReal>(min, max))
         {
