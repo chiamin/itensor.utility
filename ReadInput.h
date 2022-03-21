@@ -33,7 +33,7 @@ int count_lines (const string& file)
 }
 
 template <typename T>
-vector<vector<T>> readtxt (const string& file, int skip=0)
+vector<vector<T>> readtxt (const string& file, int skipline=0)
 {
     int N = count_lines (file);
     vector<vector<T>> re;
@@ -41,6 +41,8 @@ vector<vector<T>> readtxt (const string& file, int skip=0)
 
     auto ifs = open_file (file);
     string line;
+    for(int i = 0; i < skipline; i++)
+        getline(ifs, line);
     while (getline(ifs, line))
     {
         re.push_back (split_str<T> (line));

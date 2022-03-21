@@ -46,6 +46,36 @@ Spectrum apply_gate (MPS& psi, int i, const ITensor& gate, Direction dir, const 
     return spec;
 }
 
+MPO Make_Nup_MPO (const Electron& sites)
+{
+    AutoMPO ampo (sites);
+    for(int i = 1; i <= length(sites); i++)
+    {
+        ampo += 1.0,"Nup",i;
+    }
+    return toMPO (ampo);
+}
+
+MPO Make_Ndn_MPO (const Electron& sites)
+{
+    AutoMPO ampo (sites);
+    for(int i = 1; i <= length(sites); i++)
+    {
+        ampo += 1.0,"Ndn",i;
+    }
+    return toMPO (ampo);
+}
+
+MPO Make_NMPO (const Electron& sites)
+{
+    AutoMPO ampo (sites);
+    for(int i = 1; i <= length(sites); i++)
+    {
+        ampo += 1.0,"Ntot",i;
+    }
+    return toMPO (ampo);
+}
+
 MPO Make_NMPO (const Fermion& sites)
 {
     AutoMPO ampo (sites);
