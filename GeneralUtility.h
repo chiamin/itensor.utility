@@ -1,5 +1,6 @@
 #ifndef __GENERALUTILITY_H_CMC__
 #define __GENERALUTILITY_H_CMC__
+#include <source_location>
 
 // Use iprint
 #ifndef iprint
@@ -12,6 +13,18 @@ inline void myprinter (string name, const TType& value)
     cout << value << endl;
 }
 
+
+// Variadic function Template that takes
+// variable number of arguments and prints
+// all of them.
+void variadic_print () {} // Terminate function
+template <typename T, typename... Types>
+void variadic_print(T var1, Types... var2)
+{
+    cout << var1 << " ";
+    variadic_print (var2...);
+}
+
 #define mycheck(condition, message) mycheck_impl(condition, __func__, message)
 template <typename TypeName>
 inline void mycheck_impl (const TypeName& condition, const string& func_name, string message="")
@@ -22,6 +35,19 @@ inline void mycheck_impl (const TypeName& condition, const string& func_name, st
         throw;
     }
 }
+/*
+template <typename ConditionT, typename... MessageT>
+inline void mycheck (const ConditionT& condition, const MessageT& ...message,
+                     const std::source_location& location = std::source_location::current())
+{
+    if (!bool(condition))
+    {
+        cout << location.function_name() << ": ";
+        variadic_print (message...);
+        cout << endl;
+        throw;
+    }
+}*/
 
 namespace iutility {
 

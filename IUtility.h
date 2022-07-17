@@ -22,6 +22,23 @@ void myprinter (string name, const ITensor& T)
 
 namespace iut
 {
+
+bool is_diagonal (Matrix m, Real crit=1e-14)
+{
+    assert (ncols(m) == nrows(m));
+    for(int i = 0; i < ncols(m); i++)
+        m(i,i) = 0.;
+    return norm(m)/ncols(m) < crit;
+}
+
+void swap_column (Matrix& m, int i, int j)
+{
+    auto vi = column (m, i);
+    auto vj = column (m, j);
+    column(m,j) &= vi;
+    column(m,i) &= vj;
+}
+
 template <typename NumType, typename... Args>
 inline NumType eltT (const ITensor& T, Args... args)
 {

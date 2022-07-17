@@ -12,7 +12,7 @@ ostream& operator<< (ostream& os, const vector<T>& v)
     return os;
 }
 
-namespace vectool {
+namespace iut {
 
 template <typename T>
 vector<vector<T>> split_vector (const vector<T>& v, int itv)
@@ -112,13 +112,13 @@ inline bool has_common_ele (const vector<T>& ops1, const vector<T>& ops2)
 template <typename T>
 inline auto min_value (const vector<T>& v)
 {
-    return min_element(v.begin(), v.end());
+    return std::min_element(v.begin(), v.end());
 }
 
 template <typename T>
 inline auto max_value (const vector<T>& v)
 {
-    return max_element(v.begin(), v.end());
+    return std::max_element(v.begin(), v.end());
 }
 
 template <typename T>
