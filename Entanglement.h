@@ -83,4 +83,6 @@ Real get_entang_entropy_brute_force (const MPS& psi, vector<int>& sites)
     auto EE = EntangEntropy (rho);
     return EE;
 }
+
+Real get_entang_entropy (const MPS& psi, 
 #endif
