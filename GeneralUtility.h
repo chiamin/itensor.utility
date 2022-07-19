@@ -1,6 +1,5 @@
 #ifndef __GENERALUTILITY_H_CMC__
 #define __GENERALUTILITY_H_CMC__
-//#include <source_location>
 
 // Use iprint
 #ifndef iprint

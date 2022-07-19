@@ -326,7 +326,7 @@ Sweeps Read_sweeps (const string& fname, string key="sweeps", int nlines=std::nu
     return sweeps;
 }
 
-bool check_ortho (const ITensor& T, const Index& l, int pr=10, Real crit=1e-8)
+bool check_ortho (const ITensor& T, const Index& l, int pr=10, Real crit=1e-12)
 // <l> is the open link
 {
     auto Tdag = dag (prime (T, pr, l));
