@@ -20,17 +20,14 @@ Real EntangEntropy_rho (const ITensor& rho, Real cutoff=1e-12)
     int m = D.inds()(1).dim();
 
     Real S = 0.;
-    Real c = 0.;
     for(int i = 1; i <= m; i++)
     {
         auto p = elt (D,i,i);
         if (p > cutoff)
         {
             S += -p * log(p);
-            c += p;
         }
     }
-    mycheck (abs(c-1.) < 1e-12, "rho is not normailzed");
     return S;
 }
 
