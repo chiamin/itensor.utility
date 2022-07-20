@@ -14,11 +14,28 @@ Real EntangEntropy (const Spectrum& spec)
     return S;
 }
 
+
+Real EntangEntropy_singular (const ITensor& S)
+{
+    assert (order(S) == 2);
+    assert (dim(S.inds()(1)) == dim(S.inds()(2)));
+
+    int m = S.inds()(1).dim();
+    Real entropy = 0.;
+    for(int i = 1; i <= m; i++)
+    {
+        Real s = elt (S,i,i);
+        Real p = s*s;
+        entropy += -p * log(p);
+    }
+    return entropy;
+}
+
 Real EntangEntropy_rho (const ITensor& rho, Real cutoff=1e-12)
 {
     auto [U,D] = diagHermitian (rho, {"Cutoff",cutoff});
-    int m = D.inds()(1).dim();
 
+    int m = D.inds()(1).dim();
     Real S = 0.;
     for(int i = 1; i <= m; i++)
     {
@@ -81,42 +98,43 @@ Real get_entang_entropy_brute_force (const MPS& psi, vector<int>& sites)
 }
 
 // Measure the entanglement entropy of a system between site i1 and i2
-Real get_entang_entropy (MPS psi, int i1, int i2)
+// <args> is used 
+Real get_entang_entropy (MPS psi, int i1, int i2, const Args& args=Args::global())
 {
     if (i1 > i2)
         swap (i1,i2);
     // Pull out a sub-chain of MPS between site i1 and i2
     //
     //        |  |  |  |  |       |  |
-    //      --O--O--O--O--O--...--O--O--
+    //      --O--C--O--O--O--...--O--O--
     //
     //
     //        |  |  |  |  |       |  |
-    //  =>  --O--(  )--O--O--...--O--O--
+    //  =>  --O--(AA)--O--O--...--O--O--
+    //
     //
     //           |
-    //           A-
+    //           U
+    //            \
+    //            S 
     //        |    \|  |  |       |  |
-    //  =>  --O-----C--O--O--...--O--O--
+    //  =>  --O-----V--O--O--...--O--O--
     //
     //           |
-    //           O-
+    //           U-
     //        |    \|  |  |       |  |
-    //  =>  --O-----(  )--O--...--O--O--
+    //  =>  --O-----(AA)--O--...--O--O--
+    //
     //
     //           |  |
-    //           O--A-
+    //           O--U
+    //               \
+    //               S 
     //        |       \|  |       |  |
-    //  =>  --O--------C--O--...--O--O--
+    //  =>  --O--------V--O--...--O--O--
     //
     //
     //  =>  ...
-    //
-    //
-    //           |  |  |      |
-    //           O--O--O--..--O--
-    //        |                  \|  |
-    //  =>  --O-------------------O--O--
     //
     //
     //           |  |  |      |
@@ -124,14 +142,13 @@ Real get_entang_entropy (MPS psi, int i1, int i2)
     //                         \
     //                          S 
     //        |                  \|  |
-    //  =   --O-------------------V--O--
+    //  =>  --O-------------------V--O--
     //
     // S^2 will be the eigenvalues of the reduced density matrix for the sub-chain
     // The entanglement entropy can be computed from the singular values S
     //
     psi.position(i1);
     ITensor C = psi(i1);
-    ITensor A;
     Index ii;
     for(int i = i1; i < i2; i++)
     {
@@ -139,12 +156,12 @@ Real get_entang_entropy (MPS psi, int i1, int i2)
         auto inds = vector<Index> { siteIndex(psi,i) };
         if (i != i1)
             inds.push_back (ii);
-        tie (A, C) = denmatDecomp (AA, inds, Fromleft, {"Cutoff",1e-12});
-        ii = commonIndex (C, A);
+        auto [U,S,V] = svd (AA, inds, args);
+        C = S * V;
+        ii = commonIndex (C, U);
     }
     auto AA = C * psi(i2+1);
-    ITensor U (siteIndex(psi,i2), ii), S, V;
-    auto spec = svd (AA, U, S, V, {"Cutoff",1e-12});
-    return EntangEntropy (spec);
+    auto [U,S,V] = svd (AA, {siteIndex(psi,i2), ii}, args);
+    return EntangEntropy_singular (S);
 }
 #endif
