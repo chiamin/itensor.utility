@@ -2,6 +2,7 @@
 #define __ENTANGLEMENT_H_CMC__
 #include "ContainerUtility.h"
 #include "GeneralUtility.h"
+using namespace itensor;
 
 Real EntangEntropy (const Spectrum& spec)
 {

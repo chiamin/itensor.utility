@@ -162,5 +162,24 @@ void read (istream& s, map<T1,T2>& x)
     }
 }
 
+// ------ Write/Read all the argument objects -------
+void write_all (ostream& s) {} // Terminate the recursive function calls
+
+template <typename T, typename... Ts>
+void write_all (ostream& s, const T& t, const Ts&... ts)
+{
+    iut::write (s, t);
+    write_all (s, ts...);
 }
+
+void read_all (istream& s) {} // Terminate the recursive function calls
+
+template <typename T, typename... Ts>
+void read_all (istream& s, T& t, Ts&... ts)
+{
+    iut::read (s, t);
+    read_all (s, ts...);
+}
+
+} // End of namespace
 #endif
