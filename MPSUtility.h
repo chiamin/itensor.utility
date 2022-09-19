@@ -6,6 +6,8 @@
 using namespace std;
 using namespace itensor;
 
+namespace iut {
+
 IndexSet siteInds (const MPO& mpo)
 {
     vector<Index> ss;
@@ -223,4 +225,5 @@ void MPSReplaceTensors (MPS& psi, const MPS& subpsi, int ibeg)
         }
     }
 }
+} // namespace
 #endif
