@@ -5,6 +5,9 @@
 #ifndef iprint
 #define iprint(name) myprinter(#name, (name))
 #endif
+
+using namespace std;
+
 template <typename TType>
 inline void myprinter (string name, const TType& value)
 {
