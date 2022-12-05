@@ -6,6 +6,9 @@
 #define iprint(name) myprinter(#name, (name))
 #endif
 
+#include "itensor/all.h"
+
+using namespace itensor;
 using namespace std;
 
 template <typename TType>
